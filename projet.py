@@ -60,5 +60,6 @@ if __name__ == "__main__":
     terrain = Grille(canv, width, height, nbCase)
     terrain.bind_terrain()
 
+    print("test git")
     canv.pack(expand = True, fill = "both")
     root.mainloop()
