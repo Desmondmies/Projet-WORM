@@ -1,5 +1,6 @@
 import tkinter as tk
 from Matrice import generer_matrice_final as genMatrice
+from Dijkstra import dijkstra
 
 class Grille:
     def __init__(self, canvas, w, h, n):
@@ -10,9 +11,11 @@ class Grille:
         self.dimCaseX = self.width/self.nbCase
         self.dimCaseY = self.height/self.nbCase
 
+        self.point_a = None
+        self.point_b = None
+
         self.matrice = genMatrice(nbCase)
         self.dessiner_terrain()
-        return
 
     """
     Dessine le terrain avec des nuances de gris en s'appuyant sur une matrice dimension n+2 (n cases + les bordures)
@@ -26,7 +29,6 @@ class Grille:
                 self.canv.create_rectangle(x, y, x + self.dimCaseX, y + self.dimCaseY,
                                       fill = self._from_rgb((couleur, couleur, couleur)),
                                       activefill = "red")
-        return
 
     """
     Permet de
@@ -41,16 +43,50 @@ class Grille:
         return "#%02x%02x%02x" % rgb
 
     def bind_terrain(self):
-        self.canv.bind("<Button-1>", self.getNumCase)
-        return
+        self.canv.bind("<Button-1>", self.left_click)
 
     def getNumCase(self, event):
-        print(int(event.x / (width/nbCase)), int(event.y / (height/nbCase)))
-        return
+        x = int(event.x / (width/nbCase))
+        y = int(event.y / (height/nbCase))
+        return [x, y]
+
+    def left_click(self, event):
+        #select point A
+        self.select_point(event)
+    
+    def select_point(self, event):
+        if self.point_a is None:
+            self.point_a = self.getNumCase(event)
+        else:
+            self.point_b = self.getNumCase(event)
+
+        if self.point_a is not None and self.point_b is not None:
+            self.draw_path()
+            self.point_a = None
+            self.point_b = None
+
+    def draw_oval_point(self, p, color="green"):
+        x_a = (p[0]-1) * self.dimCaseX + int(self.dimCaseX/2)
+        y_a = (p[1]-1) * self.dimCaseY + int(self.dimCaseY/2)
+        self.canv.create_oval(x_a - 5, y_a - 5, x_a + 5, y_a + 5,
+                                fill = color,
+                                tags = "path")
+
+    def draw_path(self):
+        self.canv.delete("path")
+        pa = [self.point_a[0] + 1, self.point_a[1] + 1]
+        pb = [self.point_b[0] + 1, self.point_b[1] + 1]
+        path = dijkstra(self.matrice, pa, pb)
+        #self.draw_oval_point(pointA)
+        #self.draw_oval_point(pointB)
+
+        for point in path:
+            self.draw_oval_point(point)
+        
 
 if __name__ == "__main__":
-    width = 900
-    height = 900
+    width = 500
+    height = 500
     nbCase = 30
     root = tk.Tk()
     root.geometry(str(width) + "x" + str(height) + "+0+0")

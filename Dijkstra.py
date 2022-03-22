@@ -5,18 +5,32 @@ from Matrice import voisins_indices_matrice
 d = []
 t = {}
 cost_value = 0
+taille_mat = 0
 
 def dijkstra(matrice, point_depart, point_arrive):
-	global d,t, cost_value
+	global d,t, cost_value, taille_mat
 
-	for i in range(len(matrice)):
-		for j in range(len(matrice)):
+	if point_depart[0] > point_arrive[0]:
+		tmp = point_depart
+		point_depart = point_arrive
+		point_arrive = tmp
+
+	taille_mat = len(matrice)
+	cost_value = 0
+	#d = np.empty((taille_mat, taille_mat))
+	d = []
+	t = {}
+
+	for i in range(taille_mat):
+		for j in range(taille_mat):
 			if [i, j] == point_depart: continue
 			d.append( [np.inf, [i, j]] )
+			#d[i * taille_mat + j] = np.inf
 			key = str(i) + "," + str(j)
 			t[key] = None
 
 	d.append( [0, point_depart] )
+	#d[point_depart[1] * taille_mat + point_depart[0]] = 0
 	d_local = d.copy()
 	heapify(d_local)
 	E = []
@@ -27,7 +41,7 @@ def dijkstra(matrice, point_depart, point_arrive):
 		if si in F:
 			F[si[1][0]].pop(si[1][1])
 		E.append(si)
-		cost_value = matrice[si[1][0], si[1][1]]
+		cost_value = matrice[si[1][0], si[1][1]] *10
 
 		if si[1] == point_arrive:
 			break
@@ -60,6 +74,8 @@ def relacher(si, sj):
 	global d, t
 	si_index = indexOf(d, si)
 	sj_index = indexOf(d, sj)
+	#si_index = si[1] * taille_mat + si[0]
+	#sj_index = sj[1] * taille_mat + sj[0]
 	#retrouver dans d la valeur de distance, à partir de coordonnées si
 	move_cost = d[si_index][0] + cout(si, sj)
 	if d[sj_index][0] > move_cost:
@@ -72,5 +88,5 @@ def cout(si, sj):
     dist_Y = abs(si[1][1] - sj[1][1])
 
     if dist_X > dist_Y:
-        return 14 * dist_Y + 10 * (dist_X - dist_Y) + cost_value
-    return 14 * dist_X + 10 * (dist_Y - dist_X) + cost_value
+        return (14 * dist_Y + 10 * (dist_X - dist_Y)) + cost_value #probleme avec ces valeurs,
+    return (14 * dist_X + 10 * (dist_Y - dist_X)) + cost_value #ou probleme avec algo chemin, pas les bons chemins, très bizarre
