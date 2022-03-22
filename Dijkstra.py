@@ -40,6 +40,7 @@ def dijkstra(matrice, point_depart, point_arrive):
 	#traitement chemin T
 	key_point_arrive = str(point_arrive[0]) + "," + str(point_arrive[1])
 	path = []
+	path.append(point_arrive)
 	key = t[key_point_arrive]
 	while key != point_depart:
 		path.append(key)
