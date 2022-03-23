@@ -1,8 +1,8 @@
 import numpy as np
 
 grid_size = 15
-grid_minValue = 1
-grid_maxValue = 10
+grid_minValue = 0
+grid_maxValue = 7
 inf_value = 1000
 
 """
@@ -91,6 +91,7 @@ def voisins_matrice(m, x, y, get_Indices=False):
 			v_Y = y + j
 
 			if v_X >= 0 and v_X < m_size and v_Y >= 0 and v_Y < m_size:
+				if m[v_X, v_Y] == inf_value: continue
 				if not get_Indices:
 					voisins.append(m[v_X, v_Y])
 				else:
@@ -123,6 +124,9 @@ def calc_moyenne(l):
 Renvoi la valeur médian de la liste voisin
 """
 def median_voisin(v):
+	if len(v)%2 == 0:
+		m = v[int(len(v)/2) - 1] + v[int(len(v)/2)]
+		return m/2
 	return v[int(len(v)/2)]
 
 """
