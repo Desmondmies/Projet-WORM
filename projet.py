@@ -13,9 +13,10 @@ class Grille:
 
         self.point_a = None
         self.point_b = None
+        self.left_click_counter = 0
 
         self.matrice = genMatrice(dim_terrain)
-        print(self.matrice)
+        #print(self.matrice)
         self.dessiner_terrain()
 
     """
@@ -46,7 +47,6 @@ class Grille:
 
     def bind_terrain(self):
         self.canv.bind("<Button-1>", self.left_click)
-        self.canv.bind("<Button-3>", self.right_click)
 
     def getCoordCase(self, event):
         x = int(event.x / (width/dim_terrain))
@@ -54,11 +54,11 @@ class Grille:
         return [x, y]
 
     def left_click(self, event):
-        self.point_a = self.getCoordCase(event)
-        self.update_path()
-
-    def right_click(self, event):
-        self.point_b = self.getCoordCase(event)
+        self.left_click_counter = (self.left_click_counter + 1) % 2
+        if self.left_click_counter == 0:
+            self.point_a = self.getCoordCase(event)
+        elif self.left_click_counter == 1:
+            self.point_b = self.getCoordCase(event)
         self.update_path()
     
     def update_path(self):
@@ -91,7 +91,7 @@ class Grille:
 if __name__ == "__main__":
     width = 500
     height = 500
-    dim_terrain = 10
+    dim_terrain = 15
     root = tk.Tk()
     root.geometry(str(width) + "x" + str(height) + "+0+0")
     canv = tk.Canvas()
