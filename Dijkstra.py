@@ -4,20 +4,21 @@ from Matrice import num_cases_voisines
 
 d = []
 t = []
+dim_mat = 0
 F = []
 matrice = None
 
-def coord_numCase(x, y, dim_mat):
+def coord_numCase(x, y):
 	return y * dim_mat + x
 
-def numCase_coord(numCase, dim_mat):
+def numCase_coord(numCase):
 	coord = []
 	coord.append(numCase % dim_mat)
 	coord.append(int((numCase - coord[0]) / dim_mat))
 	return coord
 
 def dijkstra(mat, point_depart, point_arrive):
-	global d, t, F, matrice
+	global d, t, dim_mat, F, matrice
 
 	#Initialisation des variables
 	matrice = mat
@@ -25,8 +26,8 @@ def dijkstra(mat, point_depart, point_arrive):
 	dim_terrain = dim_mat - 2
 
 	#Numéros des cases dans la MATRICE (en tenant compte des bordures)
-	numCase_depart = coord_numCase(point_depart[0], point_depart[1], dim_mat)
-	numCase_arrive = coord_numCase(point_arrive[0], point_arrive[1], dim_mat)
+	numCase_depart = coord_numCase(point_depart[0], point_depart[1])
+	numCase_arrive = coord_numCase(point_arrive[0], point_arrive[1])
 	
 	#print("depart : ", numCase_depart)
 	#print("arrive : ", numCase_arrive)
@@ -36,7 +37,7 @@ def dijkstra(mat, point_depart, point_arrive):
 	d = [None] * (dim_mat * dim_mat)
 	for y in range(dim_mat):
 		for x in range(dim_mat):
-			numCase = coord_numCase(x, y, dim_mat)
+			numCase = coord_numCase(x, y)
 			d[numCase] = [np.inf, numCase] #Lorsque d sera converti en tas, on perdra le numéro de la case associée à ce coût	
 	d[numCase_depart][0] = 0
 	
@@ -88,7 +89,7 @@ def dijkstra(mat, point_depart, point_arrive):
 def relacher(s0, s1):
 	global d, t
 	
-	coord_s1 = numCase_coord(s1[1], dim_mat)
+	coord_s1 = numCase_coord(s1[1])
 	cout_deplacement = s0[0] + matrice[coord_s1[1], coord_s1[0]]
 
 	if s1[0] > cout_deplacement:
@@ -107,9 +108,9 @@ def traitement_trace(numCase_depart, numCase_arrive):
 	path = []
 	numCase_prec = numCase_arrive
 	while numCase_prec != numCase_depart:
-		path.append(numCase_coord(numCase_prec, dim_mat))
+		path.append(numCase_coord(numCase_prec))
 		numCase_prec = t[numCase_prec]
 
-	path.append(numCase_coord(numCase_depart, dim_mat))
+	path.append(numCase_coord(numCase_depart))
 
 	return path[::-1]
