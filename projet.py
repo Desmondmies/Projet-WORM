@@ -1,6 +1,7 @@
 import tkinter as tk
 from Matrice import generer_matrice_final as genMatrice, grid_maxValue, grid_minValue
 from Dijkstra import dijkstra
+from A_Star import a_star
 
 class Grille:
     def __init__(self, canvas, w, h, dim):
@@ -63,7 +64,9 @@ class Grille:
     
     def update_path(self):
         if self.point_a is None or self.point_b is None: return
-        self.draw_path()
+        self.canv.delete("path")
+        self.draw_path_a_star()
+        self.draw_path_dijkstra()
         self.point_a = None
         self.point_b = None
 
@@ -75,17 +78,27 @@ class Grille:
                                 fill = color,
                                 tags = "path")
 
-    def draw_path(self):
-        self.canv.delete("path")
+    def draw_path_dijkstra(self):
         #Coordonnées de pa et pb en tenant compte de la bordure
         pa = [self.point_a[0] + 1, self.point_a[1] + 1]
         pb = [self.point_b[0] + 1, self.point_b[1] + 1]
         path = dijkstra(self.matrice, pa, pb)
         
-        #print(path)
-        
+        if path is None: return
+        #print(path)        
         for point in path:
             self.draw_oval_point(point)
+
+    def draw_path_a_star(self):
+        #Coordonnées de pa et pb en tenant compte de la bordure
+        pa = [self.point_a[0] + 1, self.point_a[1] + 1]
+        pb = [self.point_b[0] + 1, self.point_b[1] + 1]
+        path = a_star(self.matrice, pa, pb)
+        
+        if path is None: return
+        #print(path)        
+        for point in path:
+            self.draw_oval_point(point, color="blue")
         
 
 if __name__ == "__main__":
