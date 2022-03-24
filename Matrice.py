@@ -86,27 +86,20 @@ def voisins_matrice(m, x, y, get_Indices=False):
 	voisins = []
 	for i in range(-1, 2): #va de -1, 0, 1
 		for j in range(-1, 2):
-			if i == 0 and j == 0: continue#il s'agit de la case x, y ce n'est pas un voisin.
+			if i == 0 and j == 0: continue #il s'agit de la case x, y ce n'est pas un voisin.
 			v_X = x + i
 			v_Y = y + j
-
-			if v_X >= 0 and v_X < m_size and v_Y >= 0 and v_Y < m_size:
-				if m[v_X, v_Y] == inf_value: continue
-				if not get_Indices:
-					voisins.append(m[v_X, v_Y])
-				else:
-					voisins.append([m[v_X, v_Y], [v_X, v_Y]])
+			voisins.append(m[v_X, v_Y])
+			
 	return voisins
 
 def voisins_indices_matrice(m, x, y):
 	return voisins_matrice(m, x, y, get_Indices=True)
 
-"""
-def tri_voisins(v):
-	a = v
-	a.sort()
-	return a
-"""
+def num_cases_voisines(numCase, dim_terrain):
+	return [numCase - dim_terrain - 1, numCase - dim_terrain, numCase - dim_terrain + 1,
+			numCase - 1, numCase + 1,
+			numCase + dim_terrain - 1, numCase + dim_terrain, numCase + dim_terrain + 1]
 
 """
 Calcule la moyenne d'une liste
