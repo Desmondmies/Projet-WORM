@@ -1,5 +1,5 @@
 import tkinter as tk
-from Matrice import generer_matrice_final as genMatrice, grid_maxValue
+from Matrice import generer_matrice_final as genMatrice, grid_maxValue, grid_minValue
 from Dijkstra import dijkstra
 
 class Grille:
@@ -13,9 +13,9 @@ class Grille:
 
         self.point_a = None
         self.point_b = None
+        self.left_click_counter = 0
 
-        self.matrice = genMatrice(nbCase)
-        print(self.matrice)
+        self.matrice = genMatrice(nbCase,2)
         self.dessiner_terrain()
 
     """
@@ -27,13 +27,13 @@ class Grille:
                 x = j * self.dimCaseX
                 y = i * self.dimCaseY
                 col_val = grid_maxValue - self.matrice[i+1][j+1]
-                couleur = self.remap(col_val, 1, 10, 0, 255)
+                couleur = self.remap(col_val, grid_minValue, grid_maxValue, 0, 255)
                 self.canv.create_rectangle(x, y, x + self.dimCaseX, y + self.dimCaseY,
                                       fill = self._from_rgb((couleur, couleur, couleur)),
                                       activefill = "red")
 
     """
-    Permet de
+    Permet de passer d'un intervale de valeur à un autre, convertissant valeur de l'intervalle [min1, max1] à [min2, max2]
     """
     def remap(self, valeur, min1, max1, min2, max2):
         return int(min2 + (valeur - min1) * (max2 - min2) / (max1 - min1))
@@ -46,7 +46,6 @@ class Grille:
 
     def bind_terrain(self):
         self.canv.bind("<Button-1>", self.left_click)
-        self.canv.bind("<Button-3>", self.right_click)
 
     def getNumCase(self, event):
         x = int(event.x / (width/nbCase))
@@ -54,11 +53,11 @@ class Grille:
         return [x, y]
 
     def left_click(self, event):
-        self.point_a = self.getNumCase(event)
-        self.update_path()
-
-    def right_click(self, event):
-        self.point_b = self.getNumCase(event)
+        self.left_click_counter = (self.left_click_counter + 1) % 2
+        if self.left_click_counter == 0:
+            self.point_a = self.getNumCase(event)
+        elif self.left_click_counter == 1:
+            self.point_b = self.getNumCase(event)
         self.update_path()
     
     def update_path(self):
@@ -88,7 +87,7 @@ class Grille:
 if __name__ == "__main__":
     width = 500
     height = 500
-    nbCase = 10
+    nbCase = 30
     root = tk.Tk()
     root.geometry(str(width) + "x" + str(height) + "+0+0")
     canv = tk.Canvas()

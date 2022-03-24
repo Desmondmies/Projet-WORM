@@ -1,8 +1,8 @@
 import numpy as np
 
 grid_size = 15
-grid_minValue = 0
-grid_maxValue = 7
+grid_minValue = 1
+grid_maxValue = 8
 inf_value = 1000
 
 """
@@ -10,30 +10,6 @@ Renvoi la taille n de la matrice carré
 """
 def get_taille_matrice(m):
 	return len(m) #m.shape[0]
-
-"""
-Supprime un élément dans la matrice
-Numpy pourri pour ça, obligé de faire la conversion etc
-
-def remove_elmt(m, elmt):
-    tmp = m.tolist()
-    n = len(tmp)
-    #tmp[elmt.X].pop(elmt.Y)
-    #tmp.remove(elmt)
-
-    try:
-        for i in range(1, n-1):
-            for j in range(1, n-1):
-                if tmp[i][j] == elmt:
-                    tmp[i].pop(j)
-                    mat = np.asarray(tmp, dtype=object)
-                    return mat
-    except IndexError:
-        print("index error", elmt)
-    #mat = np.asarray(tmp, dtype=object)
-    #return mat
-    return []
-"""
 
 """
 Créer une matrice nxn, rempli d'entier aléatoire de 0 à grid_maxValue
