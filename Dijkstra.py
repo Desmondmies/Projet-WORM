@@ -5,72 +5,90 @@ from Matrice import voisins_indices_matrice
 d = []
 t = {}
 cost_value = 0
+taille_mat = 0
+d_copy = []
+
+def swap(p1, p2):
+	return p2, p1
 
 def dijkstra(matrice, point_depart, point_arrive):
-	global d,t, cost_value
+	global d,t, cost_value, taille_mat, d_copy
 
-	for i in range(len(matrice)):
-		for j in range(len(matrice)):
+	#si le point de départ est le même que l'arrivé, le chemin est tout trouvé
+	if point_depart  == point_arrive:
+		return [point_depart]
+
+	taille_mat = len(matrice)
+	taille_dim = taille_mat * taille_mat
+	d = [None] * (taille_mat*taille_mat)
+	t = {}
+
+	#initialisation d à np.inf
+	for i in range(taille_mat):
+		for j in range(taille_mat):
 			if [i, j] == point_depart: continue
-			d.append( [np.inf, [i, j]] )
-			key = str(i) + "," + str(j)
-			t[key] = None
+			key = j * taille_mat + i
+			d[key] = [np.inf, key]
 
-	d.append( [0, point_depart] )
-	d_local = d.copy()
-	heapify(d_local)
+	depart_key = point_depart[1] * taille_mat + point_depart[0]
+	d[depart_key] = [0, depart_key]
+	
+	#copie obligatoire, car heappop, modifie le heap, donc les indices calculés y*n+x ne sont pas conservés
+	#donc solution, une copie de d, d est modifie mais reste inchangé pour obtenir les valeurs de distances grâce aux indices calculés
+	#et la copie se voit modifier le bon indice à chaque modification de d, pour garder les distances à jour
+	#tout en enlevant les valeurs de distance minimales déjà explorés, et donc heappop les nouvelles distances minimale pour le bon fonctionnement de l'algo
+	d_copy = d.copy()
+	heapify(d_copy)
+
 	E = []
-	F = matrice.tolist()
 
-	while len(F) > 1:
-		si = heappop(d_local)
-		if si in F:
-			F[si[1][0]].pop(si[1][1])
-		E.append(si)
-		cost_value = matrice[si[1][0], si[1][1]]
+	while len(E) < taille_dim:
+		si = heappop(d_copy)
+		si_X = si[1] % taille_mat
+		si_Y = (si[1] - si_X)//taille_mat
 
-		if si[1] == point_arrive:
+		#si le point courant est le point d'arrivé, stop
+		if [si_X, si_Y] == point_arrive:
 			break
 
+		#ajoute le point courant à la liste des "explorés"
+		if si not in E:
+			E.append(si)
+
 		#pour tout voisin de si, calcul distance et cout
-		voisins = voisins_indices_matrice(matrice, si[1][0], si[1][1])
+		voisins = voisins_indices_matrice(matrice, si_X, si_Y)
 		for v in voisins:
-			relacher(si, v)
+			relacher([si_X, si_Y], v)
+
+	if len(E) == taille_dim:
+		return [] #aucun chemin
 
 	#traitement chemin T
-	key_point_arrive = str(point_arrive[0]) + "," + str(point_arrive[1])
+	key_point_arrive = point_arrive[1] * taille_mat + point_arrive[0]
 	path = []
 	path.append(point_arrive)
+
 	key = t[key_point_arrive]
 	while key != point_depart:
 		path.append(key)
-		key_str = str(key[0]) + "," + str(key[1])
+		key_str = key[1] * taille_mat + key[0]
 		key = t[key_str]
 	path.append(point_depart)
 
 	return path[::-1]
 
-def indexOf(l, elmt):
-	for i in range(len(l)):
-		if l[i][1] == elmt[1]:
-			return i
-	return -1
-
 def relacher(si, sj):
 	global d, t
-	si_index = indexOf(d, si)
-	sj_index = indexOf(d, sj)
-	#retrouver dans d la valeur de distance, à partir de coordonnées si
-	move_cost = d[si_index][0] + cout(si, sj)
+	si_index = si[1] * taille_mat + si[0]
+	sj_index = sj[1][1] * taille_mat + sj[1][0]
+	move_cost = d[si_index][0] + sj[0] + 1
+
 	if d[sj_index][0] > move_cost:
 		d[sj_index][0] = move_cost
-		key = str(sj[1][0]) + "," + str(sj[1][1])
-		t[key] = si[1]
-
-def cout(si, sj):
-    dist_X = abs(si[1][0] - sj[1][0])
-    dist_Y = abs(si[1][1] - sj[1][1])
-
-    if dist_X > dist_Y:
-        return 14 * dist_Y + 10 * (dist_X - dist_Y) + cost_value
-    return 14 * dist_X + 10 * (dist_Y - dist_X) + cost_value
+		t[sj_index] = si
+		#update des distances de la copy
+		for i in range(len(d_copy)):
+			if d_copy[i][1] == sj_index:
+				d_copy[i][0] = move_cost
+				break
+		heapify(d_copy)

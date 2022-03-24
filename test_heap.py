@@ -12,6 +12,8 @@ print(heappop(h))
 print(heappop(h))
 print(heappop(h))
 
-a = [45, 5, 2, 124, 78, 23, 20, 8, 1]
+a = [45, 5, 4, 124, 78, 23, 20, 8, 6]
+heapify(a)
+a[5] = 2
 heapify(a)
 print(a)
