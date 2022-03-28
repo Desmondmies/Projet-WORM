@@ -3,27 +3,28 @@ from Matrice import generer_matrice_final as genMatrice, grid_maxValue, grid_min
 from Dijkstra import dijkstra
 
 class Grille:
-    def __init__(self, canvas, w, h, n):
+    def __init__(self, canvas, w, h, dim):
         self.canv = canvas
         self.width = w
         self.height = h
-        self.nbCase = n
-        self.dimCaseX = self.width/self.nbCase
-        self.dimCaseY = self.height/self.nbCase
+        self.dim_terrain = dim
+        self.dimCaseX = self.width/self.dim_terrain
+        self.dimCaseY = self.height/self.dim_terrain
 
         self.point_a = None
         self.point_b = None
         self.left_click_counter = 0
 
-        self.matrice = genMatrice(nbCase,2)
+        self.matrice = genMatrice(dim_terrain)
+        #print(self.matrice)
         self.dessiner_terrain()
 
     """
-    Dessine le terrain avec des nuances de gris en s'appuyant sur une matrice dimension n+2 (n cases + les bordures)
+    Dessine le terrain avec des nuances de gris en s'appuyant sur une matrice de dimension n+2 (n cases + bordures)
     """
     def dessiner_terrain(self):
-        for i in range(self.nbCase):
-            for j in range(self.nbCase):
+        for i in range(self.dim_terrain):
+            for j in range(self.dim_terrain):
                 x = j * self.dimCaseX
                 y = i * self.dimCaseY
                 col_val = grid_maxValue - self.matrice[i+1][j+1]
@@ -33,7 +34,7 @@ class Grille:
                                       activefill = "red")
 
     """
-    Permet de passer d'un intervale de valeur à un autre, convertissant valeur de l'intervalle [min1, max1] à [min2, max2]
+    Permet de redéfinir un intervale entre deux nouvelles bornes
     """
     def remap(self, valeur, min1, max1, min2, max2):
         return int(min2 + (valeur - min1) * (max2 - min2) / (max1 - min1))
@@ -47,17 +48,17 @@ class Grille:
     def bind_terrain(self):
         self.canv.bind("<Button-1>", self.left_click)
 
-    def getNumCase(self, event):
-        x = int(event.x / (width/nbCase))
-        y = int(event.y / (height/nbCase))
+    def getCoordCase(self, event):
+        x = int(event.x / (width/dim_terrain))
+        y = int(event.y / (height/dim_terrain))
         return [x, y]
 
     def left_click(self, event):
         self.left_click_counter = (self.left_click_counter + 1) % 2
         if self.left_click_counter == 0:
-            self.point_a = self.getNumCase(event)
+            self.point_a = self.getCoordCase(event)
         elif self.left_click_counter == 1:
-            self.point_b = self.getNumCase(event)
+            self.point_b = self.getCoordCase(event)
         self.update_path()
     
     def update_path(self):
@@ -76,10 +77,13 @@ class Grille:
 
     def draw_path(self):
         self.canv.delete("path")
+        #Coordonnées de pa et pb en tenant compte de la bordure
         pa = [self.point_a[0] + 1, self.point_a[1] + 1]
         pb = [self.point_b[0] + 1, self.point_b[1] + 1]
         path = dijkstra(self.matrice, pa, pb)
-
+        
+        #print(path)
+        
         for point in path:
             self.draw_oval_point(point)
         
@@ -87,15 +91,14 @@ class Grille:
 if __name__ == "__main__":
     width = 500
     height = 500
-    nbCase = 30
+    dim_terrain = 15
     root = tk.Tk()
     root.geometry(str(width) + "x" + str(height) + "+0+0")
     canv = tk.Canvas()
 
-    #nbCase : nombre de cases sur une ligne et une colonne
-    terrain = Grille(canv, width, height, nbCase)
+    #dim_terrain : nombre de cases sur une ligne et une colonne
+    terrain = Grille(canv, width, height, dim_terrain)
     terrain.bind_terrain()
 
-    print("test git")
     canv.pack(expand = True, fill = "both")
     root.mainloop()
