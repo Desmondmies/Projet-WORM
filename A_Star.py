@@ -1,21 +1,15 @@
+import numpy as np
 from math import sqrt
 from heapq import heappop, heapify
-from numpy import Inf
 from Matrice import num_cases_voisines
 
+d = []
+t = []
 dim_mat = 0
-G_cost = []
-H_cost = []
-F_cost = []
-F_copy = []
+F = []
 matrice = None
 
-trace_chemin = []
-
-pt_depart = []
 pt_arrivee = []
-
-open_set = []
 
 def coord_numCase(x, y):
 	return y * dim_mat + x
@@ -26,61 +20,75 @@ def numCase_coord(numCase):
 	coord.append(int((numCase - coord[0]) / dim_mat))
 	return coord
 
-def a_star(mat, point_depart, point_arrivee):
-    global dim_mat, G_cost, H_cost, F_cost, matrice, pt_depart, pt_arrivee, F_copy, trace_chemin, open_set
-    open_set = []
-    closed_set = []
+def a_star(mat, point_depart, point_arrive):
+    global d, t, dim_mat, F, matrice, pt_arrivee
 
-    pt_depart = point_depart
-    pt_arrivee = point_arrivee
-
-    dim_mat = len(mat)
-    dim_terrain = dim_mat - 2
+    #Initialisation des variables
     matrice = mat
+    dim_mat = len(matrice)
+    dim_terrain = dim_mat - 2
 
-    G_cost = [Inf] * (dim_mat * dim_mat) #distance / cout vers le point de départ
-    H_cost = [Inf] * (dim_mat * dim_mat) #distance / cout vers le point d'arrivée
-    F_cost = [Inf] * (dim_mat * dim_mat) #somme de H + G
-    for i in range(dim_mat):
-        for j in range(dim_mat):
-            numCase = coord_numCase(i, j)
-            F_cost[numCase] = [Inf, numCase]
-    trace_chemin = [None] * (dim_mat * dim_mat) #t de dijkstra
+    pt_arrivee = point_arrive
 
-    numCase_pt_depart = coord_numCase(point_depart[0], point_depart[1])
-    numCase_pt_arrivee = coord_numCase(point_arrivee[0], point_arrivee[1])
-    open_set.append(numCase_pt_depart)
-    calc_cost(point_depart)
-    #heapify(open_set)
+    #Numéros des cases dans la MATRICE (en tenant compte des bordures)
+    numCase_depart = coord_numCase(point_depart[0], point_depart[1])
+    numCase_arrive = coord_numCase(point_arrive[0], point_arrive[1])
 
-    F_copy = F_cost.copy()
+    #print("depart : ", numCase_depart)
+    #print("arrive : ", numCase_arrive)
 
-    del F_copy[0:dim_mat]
-    del F_copy[len(F_copy) - dim_mat:len(F_copy)]
+    t = [None] * (dim_mat * dim_mat)
+
+    d = [None] * (dim_mat * dim_mat)
+    for y in range(dim_mat):
+        for x in range(dim_mat):
+            numCase = coord_numCase(x, y)
+            d[numCase] = [np.inf, numCase] #Lorsque d sera converti en tas, on perdra le numéro de la case associée à ce coût	
+    d[numCase_depart][0] = 0
+
+    #print("d :\n", d)
+    #print("-" * 100)
+
+    #On a d sous forme de liste pour récupérer le cout d'une case (d[numCase] = [coutCumulé, numCase]).
+    #On a F sous la forme d'un tas pour récupérer la case du chemin avec un cout minimale plus efficacement.
+    F = d.copy()
+    #F ne contient que les cases accessibles sur le terrain (donc la matrice sans la bordure).
+		
+    #Suppression des bordures horizontales
+    del F[0:dim_mat]
+    del F[len(F) - dim_mat:len(F)]
+
+    #print(" F supp lignes :\n", F)
+    #print("-" * 100)
 
     #Suppression des colonnes de la bordure
     for i in range(0, dim_terrain * dim_terrain, dim_terrain):
-        del F_copy[i]
-        del F_copy[i + dim_terrain]
+        del F[i]
+        del F[i + dim_terrain]
 
-    heapify(F_copy)
+    #print(" F final :\n", F)
+    #print("-" * 100)
 
-    while len(open_set) > 0:
-        si = heappop(F_copy) #si => [somme G_cost + H_cost, numCase]
-        si_numCase = si[1]
+    heapify(F)
+	
+    while len(F) :
+        s0 = heappop(F) #s0 = [cout cumulé, numCase dans la MATRICE]
 
-        if si_numCase in open_set:
-            open_set.remove(si_numCase)
-        closed_set.append(si_numCase)
+        if s0[1] == numCase_arrive:
+            return traitement_trace(numCase_depart, numCase_arrive)
 
-        if si_numCase == numCase_pt_arrivee:
-            return traitement_trace(numCase_pt_depart, numCase_pt_arrivee)
+        #print("s0[1] :", s0[1])
 
-        voisins = num_cases_voisines( si_numCase, dim_mat)
-        for v in voisins:
-            if v in closed_set: continue
-            relacher(si_numCase, v)
-    
+        #pour tout voisin de s0, calcul distance et cout
+        liste_numVoisins = num_cases_voisines(s0[1], dim_mat)
+
+        #print("voisins de", s0[1], ":", liste_numVoisins)
+        #print("-" * 100)
+
+        for numVoisin in liste_numVoisins:
+            s1 = d[numVoisin] #s1 = [cout cumulé, numCase dans la MATRICE]
+            relacher(s0, s1)
+
     return None
 
 def distance(p1, p2):
@@ -90,41 +98,30 @@ def distance(p1, p2):
     d = sqrt( dX*dX + dY*dY )
     return int( d )
 
-def calc_cost(point):
-    global G_cost, H_cost, F_cost, F_copy
-    numCase = coord_numCase(point[0], point[1])
-    G_cost[numCase] = distance(point, pt_depart)
-    H_cost[numCase] = distance(point, pt_arrivee)
-    sum_cost = G_cost[numCase] + H_cost[numCase]
-    F_cost[numCase][0] = sum_cost
+def relacher(s0, s1):
+	global d, t
+	
+	coord_s1 = numCase_coord(s1[1])
+	cout_deplacement = matrice[coord_s1[1], coord_s1[0]] + distance(coord_s1, pt_arrivee)
 
-    for case in F_copy:
-        if case[1] == F_cost[numCase][1]:
-            case[0] = sum_cost
-            break
-    
-    heapify(F_copy)
+	if s1[0] > cout_deplacement:
+		d[s1[1]][0] = cout_deplacement
+		t[s1[1]] = s0[1]
+		
+		#Mise à jour des distances dans F
+		for case in F:
+			if case[1] == s1[1]:
+				case[0] = cout_deplacement
+				break
 
-def relacher(si_numCase, v):
-    global open_set
-
-    si_coord = numCase_coord(si_numCase)
-    v_coord = numCase_coord(v)
-    move_cost = G_cost[si_numCase] + distance(si_coord, v_coord)
-    if move_cost < G_cost[v] or v not in open_set:
-        calc_cost(v_coord)
-        trace_chemin[v] = si_numCase
-
-        if v not in open_set:
-            open_set.append(v)
-
+		heapify(F)
 
 def traitement_trace(numCase_depart, numCase_arrive):
 	path = []
 	numCase_prec = numCase_arrive
 	while numCase_prec != numCase_depart:
 		path.append(numCase_coord(numCase_prec))
-		numCase_prec = trace_chemin[numCase_prec]
+		numCase_prec = t[numCase_prec]
 
 	path.append(numCase_coord(numCase_depart))
 
