@@ -28,19 +28,19 @@ def dijkstra(mat, point_depart, point_arrive):
 	#Numéros des cases dans la MATRICE (en tenant compte des bordures)
 	numCase_depart = coord_numCase(point_depart[0], point_depart[1])
 	numCase_arrive = coord_numCase(point_arrive[0], point_arrive[1])
-	
+
 	#print("depart : ", numCase_depart)
 	#print("arrive : ", numCase_arrive)
 
 	t = [None] * (dim_mat * dim_mat)
-	
+
 	d = [None] * (dim_mat * dim_mat)
 	for y in range(dim_mat):
 		for x in range(dim_mat):
 			numCase = coord_numCase(x, y)
-			d[numCase] = [np.inf, numCase] #Lorsque d sera converti en tas, on perdra le numéro de la case associée à ce coût	
+			d[numCase] = [np.inf, numCase] #Lorsque d sera converti en tas, on perdra le numéro de la case associée à ce coût
 	d[numCase_depart][0] = 0
-	
+
 	#print("d :\n", d)
 	#print("-" * 100)
 
@@ -48,7 +48,7 @@ def dijkstra(mat, point_depart, point_arrive):
 	#On a F sous la forme d'un tas pour récupérer la case du chemin avec un cout minimale plus efficacement.
 	F = d.copy()
 	#F ne contient que les cases accessibles sur le terrain (donc la matrice sans la bordure).
-		
+
 		#Suppression des bordures horizontales
 	del F[0:dim_mat]
 	del F[len(F) - dim_mat:len(F)]
@@ -60,12 +60,12 @@ def dijkstra(mat, point_depart, point_arrive):
 	for i in range(0, dim_terrain * dim_terrain, dim_terrain):
 		del F[i]
 		del F[i + dim_terrain]
-		
+
 	#print(" F final :\n", F)
 	#print("-" * 100)
 
 	heapify(F)
-	
+
 	while len(F) :
 		s0 = heappop(F) #s0 = [cout cumulé, numCase dans la MATRICE]
 
@@ -76,7 +76,7 @@ def dijkstra(mat, point_depart, point_arrive):
 
 		#pour tout voisin de s0, calcul distance et cout
 		liste_numVoisins = num_cases_voisines(s0[1], dim_mat)
-		
+
 		#print("voisins de", s0[1], ":", liste_numVoisins)
 		#print("-" * 100)
 
@@ -88,14 +88,15 @@ def dijkstra(mat, point_depart, point_arrive):
 
 def relacher(s0, s1):
 	global d, t
-	
+
 	coord_s1 = numCase_coord(s1[1])
+	#matrice [ coord_s1[1], coord_s1[0] ] => matrice [ ligne, colonne ]
 	cout_deplacement = s0[0] + matrice[coord_s1[1], coord_s1[0]]
 
 	if s1[0] > cout_deplacement:
 		d[s1[1]][0] = cout_deplacement
 		t[s1[1]] = s0[1]
-		
+
 		#Mise à jour des distances dans F
 		for case in F:
 			if case[1] == s1[1]:
