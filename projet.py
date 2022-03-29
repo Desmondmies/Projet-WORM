@@ -70,10 +70,10 @@ class Grille:
         self.point_a = None
         self.point_b = None
 
-    def draw_oval_point(self, p, color="green"):
+    def draw_oval_point(self, p, color="green", size_offset = 0):
         x_a = (p[0]-1) * self.dimCaseX + int(self.dimCaseX/2)
         y_a = (p[1]-1) * self.dimCaseY + int(self.dimCaseY/2)
-        oval_size = 5
+        oval_size = 5 + size_offset
         self.canv.create_oval(x_a - oval_size, y_a - oval_size, x_a + oval_size, y_a + oval_size,
                                 fill = color,
                                 tags = "path")
@@ -98,7 +98,7 @@ class Grille:
         if path is None: return
         #print(path)        
         for point in path:
-            self.draw_oval_point(point, color="blue")
+            self.draw_oval_point(point, color="blue", size_offset=2)
         
 
 if __name__ == "__main__":
