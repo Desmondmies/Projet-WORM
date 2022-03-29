@@ -1,4 +1,5 @@
 from Utils import calc_vec, normalize_vec, produit_vec
+from Matrice import inf_value
 
 """
 def get_vertex(i, j):
@@ -108,7 +109,11 @@ def gen_terrain_quad(matrice):
 	for i in range(1, n-1):
 		ligne = []
 		for j in range(1, n-1):
-			quad = get_quad(j, matrice[i, j]/2, i)
+			if matrice[i, j] != inf_value:
+				y = matrice[i, j] / 2
+			else:
+				y = -1
+			quad = get_quad(j, y, i)
 			ligne.append(quad)
 		lignesQuads.append(ligne)
 	#print(vertex)

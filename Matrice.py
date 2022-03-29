@@ -53,6 +53,15 @@ def remplacement_bordure(m):
 		m[n - 1 , n - i -1] = inf_value
 	return m
 
+def obstacle_matrice(m, i, j, sizeX = 1, sizeY = 1):
+
+	dimX = i + sizeX
+	dimY = j + sizeY
+	for x in range(i, dimX):
+		for y in range(j, dimY):
+			m[x, y] = inf_value
+	return m
+
 """
 Renvoi les 8 voisins disponibles de la matrice m, à partir de la position x, y
 Si 1 voisin est en dehors des dimensions de la matrice carré, il n'est pas pris en compte

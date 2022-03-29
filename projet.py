@@ -1,5 +1,5 @@
 import tkinter as tk
-from Matrice import generer_matrice_final as genMatrice, grid_maxValue, grid_minValue
+from Matrice import generer_matrice_final as genMatrice, obstacle_matrice, grid_maxValue, grid_minValue, inf_value
 from Dijkstra import dijkstra
 from A_Star import a_star
 
@@ -17,6 +17,8 @@ class Grille:
         self.left_click_counter = 0
 
         self.matrice = genMatrice(dim_terrain)
+        self.matrice = obstacle_matrice(self.matrice, 2, 5, sizeX=7)
+        self.matrice = obstacle_matrice(self.matrice, 2, 5, sizeY=3)
         #print(self.matrice)
         self.dessiner_terrain()
 
@@ -28,11 +30,15 @@ class Grille:
             for j in range(self.dim_terrain):
                 x = j * self.dimCaseX
                 y = i * self.dimCaseY
-                col_val = grid_maxValue - self.matrice[i+1][j+1]
-                couleur = self.remap(col_val, grid_minValue, grid_maxValue, 0, 255)
-                self.canv.create_rectangle(x, y, x + self.dimCaseX, y + self.dimCaseY,
-                                            fill = self._from_rgb((couleur, couleur, couleur)),
-                                            activefill = "red")
+                if self.matrice[i+1][j+1] == inf_value:
+                    self.canv.create_rectangle(x, y, x + self.dimCaseX, y + self.dimCaseY,
+                                                fill = self._from_rgb((247, 234, 43)) )
+                else:
+                    col_val = grid_maxValue - self.matrice[i+1][j+1]
+                    couleur = self.remap(col_val, grid_minValue, grid_maxValue, 0, 255)
+                    self.canv.create_rectangle(x, y, x + self.dimCaseX, y + self.dimCaseY,
+                                                fill = self._from_rgb((couleur, couleur, couleur)),
+                                                activefill = "red")
 
     """
     Permet de redéfinir un intervale entre deux nouvelles bornes
@@ -55,11 +61,14 @@ class Grille:
         return [x, y]
 
     def left_click(self, event):
+        pt_coord = self.getCoordCase(event)
+        if self.matrice[pt_coord[1]+1, pt_coord[0]+1] == inf_value: return
+
         self.left_click_counter = (self.left_click_counter + 1) % 2
         if self.left_click_counter == 0:
-            self.point_a = self.getCoordCase(event)
+            self.point_a = pt_coord
         elif self.left_click_counter == 1:
-            self.point_b = self.getCoordCase(event)
+            self.point_b = pt_coord
         self.update_path()
     
     def update_path(self):

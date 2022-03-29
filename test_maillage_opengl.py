@@ -2,7 +2,7 @@ from OpenGL.GL import *
 from OpenGL.GLU import *
 from OpenGL.GLUT import *
 
-from Matrice import generer_matrice_final, grid_maxValue
+from Matrice import generer_matrice_final, obstacle_matrice, grid_maxValue
 from TerrainVertex import gen_terrain_data
 
 window_name = "TEST MAILLAGE"
@@ -46,11 +46,16 @@ def init():
                 1.0, 0.0, 1.0]
 
     m = generer_matrice_final(taille_matrice)
+    m = obstacle_matrice(m, 4, 3, sizeX=4)
+    m = obstacle_matrice(m, 4, 3, sizeY=3)
     terrainData = gen_terrain_data(m)
 
     glShadeModel(GL_SMOOTH)
     quadric = gluNewQuadric()
     gluQuadricDrawStyle(quadric, GLU_FILL)
+
+def material_obstacle():
+    glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, (0, 0, 0))
 
 def material_ocean():
     glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, (0.3, 0.7, 0.7))
@@ -65,15 +70,17 @@ def material_neige():
 	glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, (0.8, 0.8, 0.8))
 
 def material_hauteur(h):
-	hauteur_ratio = h / grid_maxValue
-	if hauteur_ratio <= 0.15:
-		material_ocean()
-	elif hauteur_ratio <= 0.23:
-		material_sable()
-	elif hauteur_ratio <= 0.35:
-		material_herbe()
-	else:
-		material_neige()
+    hauteur_ratio = h / grid_maxValue
+    if hauteur_ratio < 0:
+        material_obstacle()
+    elif hauteur_ratio <= 0.15:
+        material_ocean()
+    elif hauteur_ratio <= 0.23:
+        material_sable()
+    elif hauteur_ratio <= 0.35:
+        material_herbe()
+    else:
+        material_neige()
 
 def draw_quad(quad):
     for vert in quad:
@@ -156,13 +163,13 @@ def keyboard(key, x, y):
     global cam_MoveX, cam_MoveZ
 
     if key == b'z':
-        cam_MoveZ = (cam_MoveZ + 0.1) % 360
+        cam_MoveZ = (cam_MoveZ + 0.5) % 360
     elif key == b's':
-        cam_MoveZ = (cam_MoveZ - 0.1) % 360
+        cam_MoveZ = (cam_MoveZ - 0.5) % 360
     if key == b'q':
-        cam_MoveX = (cam_MoveX + 1) % 360
+        cam_MoveX = (cam_MoveX + 2) % 360
     elif key == b'd':
-        cam_MoveX = (cam_MoveX - 1) % 360
+        cam_MoveX = (cam_MoveX - 2) % 360
 
     glutPostRedisplay()
 
