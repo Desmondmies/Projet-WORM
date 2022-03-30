@@ -1,24 +1,31 @@
 import tkinter as tk
+import numpy as np
 from Matrice import generer_matrice_final as genMatrice, obstacle_matrice, grid_maxValue, grid_minValue, inf_value
 from Dijkstra import dijkstra
 from A_Star import a_star
 
-class Grille:
-    def __init__(self, canvas, w, h, dim):
+class Terrain:
+    def __init__(self, canvas, w, h, dim, matrice = None):
         self.canv = canvas
         self.width = w
         self.height = h
         self.dim_terrain = dim
-        self.dimCaseX = self.width/self.dim_terrain
-        self.dimCaseY = self.height/self.dim_terrain
+        self.dimCaseX = w/dim
+        self.dimCaseY = h/dim
 
         self.point_a = None
         self.point_b = None
         self.left_click_counter = 0
 
-        self.matrice = genMatrice(dim_terrain)
-        self.matrice = obstacle_matrice(self.matrice, 2, 5, sizeX=7)
-        self.matrice = obstacle_matrice(self.matrice, 2, 5, sizeY=3)
+        #tester matrice is None 
+        if isinstance(matrice, np.ndarray) :
+            self.matrice = matrice
+        else:
+            self.matrice = genMatrice(dim)
+
+        #self.matrice = obstacle_matrice(self.matrice, 2, 5, sizeX=7)
+        #self.matrice = obstacle_matrice(self.matrice, 2, 5, sizeY=3)
+
         #print(self.matrice)
         self.dessiner_terrain()
 
@@ -56,8 +63,8 @@ class Grille:
         self.canv.bind("<Button-1>", self.left_click)
 
     def getCoordCase(self, event):
-        x = int(event.x / (width/dim_terrain))
-        y = int(event.y / (height/dim_terrain))
+        x = int(event.x / (self.width/self.dim_terrain))
+        y = int(event.y / (self.height/self.dim_terrain))
         return [x, y]
 
     def left_click(self, event):
@@ -108,19 +115,8 @@ class Grille:
         #print(path)        
         for point in path:
             self.draw_oval_point(point, color="blue", size_offset=2)
-
-
-if __name__ == "__main__":
-    width = 500
-    height = 500
-    dim_terrain = 15
-    root = tk.Tk()
-    root.geometry(str(width) + "x" + str(height) + "+0+0")
-    canv = tk.Canvas()
-
-    #dim_terrain : nombre de cases sur une ligne et une colonne
-    terrain = Grille(canv, width, height, dim_terrain)
-    terrain.bind_terrain()
-
-    canv.pack(expand = True, fill = "both")
-    root.mainloop()
+        
+    def nouveau_terrain(self):
+        self.canv.delete("all")
+        self.matrice = genMatrice(self.dim_terrain)
+        self.dessiner_terrain()
