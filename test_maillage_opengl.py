@@ -4,6 +4,7 @@ from OpenGL.GLUT import *
 
 from Matrice import generer_matrice_final, obstacle_matrice, grid_maxValue
 from TerrainVertex import gen_terrain_data
+from Worm import draw_worm, worm_moveX, worm_moveZ
 
 window_name = "TEST MAILLAGE"
 width, height = 750, 750
@@ -56,16 +57,12 @@ def init():
 
 def material_obstacle():
     glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, (0, 0, 0))
-
 def material_ocean():
     glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, (0.3, 0.7, 0.7))
-
 def material_sable():
     glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, (1, 0.88, 0.5))
-
 def material_herbe():
     glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, (0.3, 1, 0.3))
-
 def material_neige():
 	glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, (0.8, 0.8, 0.8))
 
@@ -141,6 +138,8 @@ def display():
     glTranslatef(- terrain_offset, 0.0, - terrain_offset)
     display_terrain()
 
+    draw_worm(quadric)
+
     glPopMatrix()
     glPopMatrix()
     glutSwapBuffers()
@@ -173,6 +172,18 @@ def keyboard(key, x, y):
 
     glutPostRedisplay()
 
+def special_func(key, x, y):
+    if key == GLUT_KEY_UP:
+        worm_moveZ(-1)
+    elif key == GLUT_KEY_DOWN:
+        worm_moveZ(1)
+    elif key == GLUT_KEY_LEFT:
+        worm_moveX(-1)
+    elif key == GLUT_KEY_RIGHT:
+        worm_moveX(1)
+
+    glutPostRedisplay()
+
 
 # ---------------------------------------------------
 
@@ -185,6 +196,7 @@ glutReshapeWindow(width, height)
 glutReshapeFunc(reshape)
 glutDisplayFunc(display)
 glutKeyboardFunc(keyboard)
+glutSpecialFunc(special_func)
 
 init()
 
