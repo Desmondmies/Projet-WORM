@@ -34,8 +34,6 @@ def init():
     glClearColor(0.0, 0.0, 0.0, 0.0)
 
     glEnable(GL_DEPTH_TEST)
-    #glEnable(GL_BLEND)
-    #glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
 
     init_light()
 
@@ -47,26 +45,29 @@ def init():
                 1.0, 0.0, 1.0]
 
     m = generer_matrice_final(taille_matrice)
-    m = obstacle_matrice(m, 4, 3, sizeX=4)
-    m = obstacle_matrice(m, 4, 3, sizeY=3)
-    terrainData = gen_terrain_data(m)
+    m = obstacle_matrice(m, 4, 3, sizeX=4) #place un obstacle
+    m = obstacle_matrice(m, 4, 3, sizeY=3) #place un obstacle
+    terrainData = gen_terrain_data(m) #génère les données du terrain 3D à partir de la matrice
 
     glShadeModel(GL_SMOOTH)
     quadric = gluNewQuadric()
     gluQuadricDrawStyle(quadric, GLU_FILL)
 
 def material_obstacle():
-    glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, (0, 0, 0))
+    glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, (0, 0, 0)) #noir
 def material_ocean():
-    glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, (0.3, 0.7, 0.7))
+    glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, (0.3, 0.7, 0.7)) #bleu
 def material_sable():
-    glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, (1, 0.88, 0.5))
+    glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, (1, 0.88, 0.5)) #couleur sable?
 def material_herbe():
-    glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, (0.3, 1, 0.3))
+    glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, (0.3, 1, 0.3)) #vert
 def material_neige():
-	glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, (0.8, 0.8, 0.8))
+	glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, (0.8, 0.8, 0.8)) #blanc
 
 def material_hauteur(h):
+    """
+    Renvoi le materiel nécéssaire selon la hauteur y du point
+    """
     hauteur_ratio = h / grid_maxValue
     if hauteur_ratio < 0:
         material_obstacle()
@@ -98,18 +99,15 @@ def display_terrain():
     #terrainData => [ quads, paliers, centres ]
     #quads => [ [quad, quad, quad], [quad, quad, quad]]
 
-    glNormal(0, 1, 0)
     glBegin(GL_QUADS)
-    #glColor4f(0.2, 0.8, 0.2, 1.0)
-    #glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, (0.2, 0.5, 0.2)) #material herbe
-    #QUADS
+
+    #dessine tout les QUADS
+    glNormal(0, 1, 0) #normal de 1 sur l'axe y pour chaque quad
     for ligneQuad in terrainData["Quads"]:
         for quad in ligneQuad:
             draw_quad(quad)
 
-    #PALIERS
-    #glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, (0.3, 0.3, 0.32)) #material rock
-    #glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, (0.2, 0.4, 0.2)) #material herbe2
+    #dessine tout les PALIERS
     for palier in terrainData["Paliers"]:
         normal = palier[0]
         glNormal(normal[0], normal[1], normal[2])
@@ -120,7 +118,7 @@ def display_terrain():
     glEnd()
 
     glBegin(GL_TRIANGLES)
-    #CENTRES
+    #dessine tout les CENTRES
     for centres in terrainData["Centres"]:
         draw_triangle(centres[0])
         draw_triangle(centres[1])
@@ -135,10 +133,11 @@ def display():
     glRotatef(cam_MoveX, 0.0, 1.0, 0.0)
 
     glPushMatrix()
-    glTranslatef(- terrain_offset, 0.0, - terrain_offset)
-    display_terrain()
+    glTranslatef(- terrain_offset, 0.0, - terrain_offset) #décale le terrain au milieu de l'écran
+    
+    display_terrain() #dessine le terrain
 
-    draw_worm(quadric)
+    draw_worm(quadric) #dessine le ver
 
     glPopMatrix()
     glPopMatrix()
@@ -154,6 +153,7 @@ def reshape(width, height):
     glMatrixMode(GL_MODELVIEW)
     glLoadIdentity()
 
+    # Positionne la caméra assez loin et un peu plus haut pour regarder le terrain
     gluLookAt(0.0, taille_matrice + 2, taille_matrice * 2,
     0.0, 0.0, 0.0,
     0.0, 1.0, 0.0)
@@ -173,6 +173,9 @@ def keyboard(key, x, y):
     glutPostRedisplay()
 
 def special_func(key, x, y):
+    """
+    Special Func prend en compte "autres" touches du clavier? dont les flèches
+    """
     if key == GLUT_KEY_UP:
         worm_moveZ(-1)
     elif key == GLUT_KEY_DOWN:
