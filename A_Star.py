@@ -93,28 +93,31 @@ def a_star(mat, point_depart, point_arrive):
 
 def distance(p1, p2):
     if p1 == p2: return 0
-    dX = abs(p1[0] - p2[0])
-    dY = abs(p1[1] - p2[1])
+    dX = p2[0] - p1[0]
+    dY = p2[1] - p1[1]
     d = sqrt( dX*dX + dY*dY )
+    #print(p1, p2, "dist : ", d)
     return int( d )
 
 def relacher(s0, s1):
-	global d, t
-	
-	coord_s1 = numCase_coord(s1[1])
-	cout_deplacement = matrice[coord_s1[1], coord_s1[0]] + distance(coord_s1, pt_arrivee)
+    global d, t
 
-	if s1[0] > cout_deplacement:
-		d[s1[1]][0] = cout_deplacement
-		t[s1[1]] = s0[1]
-		
-		#Mise à jour des distances dans F
-		for case in F:
-			if case[1] == s1[1]:
-				case[0] = cout_deplacement
-				break
+    coord_s1 = numCase_coord(s1[1])
+    cout_deplacement = matrice[coord_s1[1], coord_s1[0]] + distance(coord_s1, pt_arrivee)
 
-		heapify(F)
+    #print("cout :", cout_deplacement)
+
+    if s1[0] > cout_deplacement:
+        d[s1[1]][0] = cout_deplacement
+        t[s1[1]] = s0[1]
+
+        #Mise à jour des distances dans F
+        for case in F:
+            if case[1] == s1[1]:
+                case[0] = cout_deplacement
+                break
+
+        heapify(F)
 
 def traitement_trace(numCase_depart, numCase_arrive):
 	path = []

@@ -60,6 +60,18 @@ class Menubar:
         matrice = np.array(dico["matrice"])
         Menubar.interface.charger_terrain(matrice)
 
+        path_a_star = dico["path_a_star"]
+        path_dijkstra = dico["path_dijkstra"]
+
+        if(path_a_star is not None):
+            Menubar.interface.terrain.path_a_star = path_a_star
+            Menubar.interface.terrain.tracer_path_a_star()
+
+        if(path_dijkstra is not None):
+            Menubar.interface.terrain.path_dijkstra = path_dijkstra
+            Menubar.interface.terrain.tracer_path_dijkstra()
+
+
         fichier.close()
 
         return True
@@ -78,10 +90,11 @@ class Menubar:
             return False
 
         fichier = open(path, 'w')
-        dico = {"matrice" : Menubar.interface.terrain.matrice.tolist()}
-        #fichier.write('{')
+        dico = {"matrice" : Menubar.interface.terrain.matrice.tolist(), 
+                "path_dijkstra" : Menubar.interface.terrain.path_dijkstra, 
+                "path_a_star" : Menubar.interface.terrain.path_a_star}
+
         fichier.write(str(dico))
-        #fichier.write('}')
 
         fichier.close()
         return True
