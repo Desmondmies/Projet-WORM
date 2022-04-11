@@ -2,14 +2,14 @@ from OpenGL.GL import *
 from OpenGL.GLU import *
 from OpenGL.GLUT import *
 
-from Matrice import generer_matrice_final, obstacle_matrice, grid_maxValue
+from Matrice import generer_matrice_final, obstacle_matrice, grid_maxValue, gen_random_obstacle
 from TerrainVertex import gen_terrain_data
-from Worm import draw_worm, worm_moveX, worm_moveZ
+from Worm import draw_worm, worm_moveX, worm_moveZ, init_worm
 
 window_name = "TEST MAILLAGE"
 width, height = 750, 750
 
-taille_matrice = 10
+taille_matrice = 15
 terrain_offset = taille_matrice + (taille_matrice/6)
 
 cam_MoveX, cam_MoveZ = 0, 0
@@ -37,21 +37,16 @@ def init():
 
     init_light()
 
-    vertices = [-1.0, 0.0, -1.0,
-                1.0, 0.0, 1.0,
-                -1.0, 0.0, 1.0,
-                -1.0, 0.0, -1.0,
-                1.0, 0.0, -1.0,
-                1.0, 0.0, 1.0]
-
     m = generer_matrice_final(taille_matrice)
-    m = obstacle_matrice(m, 4, 3, sizeX=4) #place un obstacle
-    m = obstacle_matrice(m, 4, 3, sizeY=3) #place un obstacle
+    #m = obstacle_matrice(m, 4, 3, sizeX=4) #place un obstacle
+    #m = obstacle_matrice(m, 4, 3, sizeY=3) #place un obstacle
+    m = gen_random_obstacle(m)
     terrainData = gen_terrain_data(m) #génère les données du terrain 3D à partir de la matrice
 
     glShadeModel(GL_SMOOTH)
     quadric = gluNewQuadric()
-    gluQuadricDrawStyle(quadric, GLU_FILL)
+    init_worm(quadric)
+    #gluQuadricDrawStyle(quadric, GLU_LINE)
 
 def material_obstacle():
     glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, (0, 0, 0)) #noir
@@ -134,10 +129,11 @@ def display():
 
     glPushMatrix()
     glTranslatef(- terrain_offset, 0.0, - terrain_offset) #décale le terrain au milieu de l'écran
-    
+
     display_terrain() #dessine le terrain
 
-    draw_worm(quadric) #dessine le ver
+    #draw_worm(quadric) #dessine le ver
+    draw_worm()
 
     glPopMatrix()
     glPopMatrix()
@@ -149,7 +145,7 @@ def reshape(width, height):
     glMatrixMode(GL_PROJECTION)
     glLoadIdentity() #remplace la matrice actuel avec la matrice identité
 
-    gluPerspective(70, ar, 1, 500) # (fov Y, aspect ratio, z NearPlane, z FarPlane)
+    gluPerspective(70, ar, 1, 1000) # (fov Y, aspect ratio, z NearPlane, z FarPlane)
     glMatrixMode(GL_MODELVIEW)
     glLoadIdentity()
 
