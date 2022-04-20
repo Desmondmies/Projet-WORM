@@ -34,11 +34,12 @@ class Menubar:
         Menubar.interface.bind('<Control-O>', Menubar.ouvrir)
         Menubar.interface.bind('<Control-s>', Menubar.enregistrer)
         Menubar.interface.bind('<Control-S>', Menubar.enregistrer)
+        
         Menubar.interface.bind('<Escape>', Menubar.quitter)
 
     def afficher(self):
         Menubar.interface.root.config(menu = self.menubar)
-            
+
 
     @staticmethod
     def nouveau(evt = None):
@@ -50,8 +51,8 @@ class Menubar:
     """
     @staticmethod
     def ouvrir(evt = None):
-        path = filedialog.askopenfilename(initialdir = "./Saves/", 
-                                            title = "Ouvrir", 
+        path = filedialog.askopenfilename(initialdir = "./Saves/",
+                                            title = "Ouvrir",
                                             filetypes = (("Fichier texte","*.txt"), ))
         if path == '': return False
 
@@ -70,8 +71,6 @@ class Menubar:
         if(path_dijkstra is not None):
             Menubar.interface.terrain.path_dijkstra = path_dijkstra
             Menubar.interface.terrain.tracer_path_dijkstra()
-
-
         fichier.close()
 
         return True
@@ -82,16 +81,16 @@ class Menubar:
     """
     @staticmethod
     def enregistrer(evt = None):
-        path = filedialog.asksaveasfilename(initialdir = "./Saves/", 
-                                            title = "Enregistrer", 
+        path = filedialog.asksaveasfilename(initialdir = "./Saves/",
+                                            title = "Enregistrer",
                                             filetypes = (("Fichier texte","*.txt"), ),
                                             defaultextension = ".txt")
-        if path == "": 
+        if path == "":
             return False
 
         fichier = open(path, 'w')
-        dico = {"matrice" : Menubar.interface.terrain.matrice.tolist(), 
-                "path_dijkstra" : Menubar.interface.terrain.path_dijkstra, 
+        dico = {"matrice" : Menubar.interface.terrain.matrice.tolist(),
+                "path_dijkstra" : Menubar.interface.terrain.path_dijkstra,
                 "path_a_star" : Menubar.interface.terrain.path_a_star}
 
         fichier.write(str(dico))
@@ -101,7 +100,7 @@ class Menubar:
 
     @staticmethod
     def quitter(evt = None):
-        reponse = messagebox.askyesno(title = 'Quitter', 
+        reponse = messagebox.askyesno(title = 'Quitter',
                                       message = 'Voulez-vous quitter ?')
         if(reponse):
             exit(1)

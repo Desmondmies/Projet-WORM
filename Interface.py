@@ -12,24 +12,24 @@ class Interface:
         self.root.resizable(False, False)
 
         self.canv = tk.Canvas(self.root)
-        
+
     def creer_menubar(self):
         self.menubar = Menubar(self)
         self.menubar.afficher()
 
     def creer_terrain(self, dim_terrain):
-        self.terrain = Terrain(self.canv, self.width, self.height, dim_terrain)
+        self.terrain = Terrain(self, self.width, self.height, dim_terrain)
         self.terrain.bind_terrain()
-    
+
     def charger_terrain(self, matrice):
         self.canv.delete("all")
-        self.terrain = Terrain(self.canv, self.width, self.height, len(matrice) - 2, matrice)
+        self.terrain = Terrain(self, self.width, self.height, len(matrice) - 2, matrice)
         self.terrain.bind_terrain() #Nécessaire sinon on manipule toujours l'ancienne matrice
 
     def afficher(self):
         self.terrain.dessiner_terrain()
         self.canv.pack(expand = True, fill = "both")
-    
+
     def bind(self, action, fct):
         self.root.bind(action, fct)
 
@@ -44,11 +44,10 @@ class Interface:
 
 if __name__ == "__main__":
     interface = Interface()
-    
+
     interface.creer_menubar()
     interface.creer_terrain(30)
 
-
     interface.afficher()
-    
+
     interface.root.mainloop()
