@@ -1,21 +1,13 @@
 import numpy as np
 from heapq import heappop, heapify
 from Matrice import num_cases_voisines
+from Utils import coord_numCase, numCase_coord
 
 d = []
 t = []
 dim_mat = 0
 F = []
 matrice = None
-
-def coord_numCase(x, y):
-	return y * dim_mat + x
-
-def numCase_coord(numCase):
-	coord = []
-	coord.append(numCase % dim_mat)
-	coord.append(int((numCase - coord[0]) / dim_mat))
-	return coord
 
 def dijkstra(mat, point_depart, point_arrive):
 	global d, t, dim_mat, F, matrice
@@ -26,8 +18,8 @@ def dijkstra(mat, point_depart, point_arrive):
 	dim_terrain = dim_mat - 2
 
 	#Numéros des cases dans la MATRICE (en tenant compte des bordures)
-	numCase_depart = coord_numCase(point_depart[0], point_depart[1])
-	numCase_arrive = coord_numCase(point_arrive[0], point_arrive[1])
+	numCase_depart = coord_numCase(point_depart[0], point_depart[1], dim_mat)
+	numCase_arrive = coord_numCase(point_arrive[0], point_arrive[1], dim_mat)
 
 	#print("depart : ", numCase_depart)
 	#print("arrive : ", numCase_arrive)
@@ -37,7 +29,7 @@ def dijkstra(mat, point_depart, point_arrive):
 	d = [None] * (dim_mat * dim_mat)
 	for y in range(dim_mat):
 		for x in range(dim_mat):
-			numCase = coord_numCase(x, y)
+			numCase = coord_numCase(x, y, dim_mat)
 			d[numCase] = [np.inf, numCase] #Lorsque d sera converti en tas, on perdra le numéro de la case associée à ce coût
 	d[numCase_depart][0] = 0
 
@@ -89,9 +81,10 @@ def dijkstra(mat, point_depart, point_arrive):
 def relacher(s0, s1):
 	global d, t
 
-	coord_s1 = numCase_coord(s1[1])
+	coord_s1 = numCase_coord(s1[1], dim_mat)
 	#matrice [ coord_s1[1], coord_s1[0] ] => matrice [ ligne, colonne ]
-	cout_deplacement = s0[0] + matrice[coord_s1[1], coord_s1[0]]
+	#cout_deplacement = s0[0] + matrice[coord_s1[1], coord_s1[0]] + cout(s0, s1)
+	cout_deplacement = cout(s0, s1)
 
 	if s1[0] > cout_deplacement:
 		d[s1[1]][0] = cout_deplacement
@@ -105,13 +98,25 @@ def relacher(s0, s1):
 
 		heapify(F)
 
+def cout(s0, s1):
+	coord_s0 = numCase_coord(s0[1], dim_mat)
+	coord_s1 = numCase_coord(s1[1], dim_mat)
+
+	distX = abs(coord_s1[0] - coord_s0[0])
+	distY = abs(coord_s1[1] - coord_s0[1])
+
+	if(distX == distY):
+		return s0[0] + matrice[coord_s1[1], coord_s1[0]] * 14
+	return s0[0] + matrice[coord_s1[1], coord_s1[0]] * 10
+
+
 def traitement_trace(numCase_depart, numCase_arrive):
 	path = []
 	numCase_prec = numCase_arrive
 	while numCase_prec != numCase_depart:
-		path.append(numCase_coord(numCase_prec))
+		path.append(numCase_coord(numCase_prec, dim_mat))
 		numCase_prec = t[numCase_prec]
 
-	path.append(numCase_coord(numCase_depart))
+	path.append(numCase_coord(numCase_depart, dim_mat))
 
 	return path[::-1]

@@ -16,6 +16,23 @@ def normalize_vec(v):
 def calc_vec(pts1, pts2):
 	return [pts2[0] - pts1[0], pts2[1] - pts1[1], pts2[2] - pts1[2]]
 
+def coord_numCase(x, y, dim_mat):
+	return y * dim_mat + x
+
+def numCase_coord(numCase, dim_mat):
+	coord = []
+	coord.append(numCase % dim_mat)
+	coord.append(int((numCase - coord[0]) / dim_mat))
+	return coord 
+
+def horner(x, p):
+    res = 0
+    for coeff in p:
+        res *= x
+        res += coeff
+    return res
+
+
 def substract_list(a, b):
 	tmp = [ a[0] - b[0], a[1] - b[1], a[2] - b[2] ]
 	return tmp
