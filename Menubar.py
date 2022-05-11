@@ -34,7 +34,7 @@ class Menubar:
         Menubar.interface.bind('<Control-O>', Menubar.ouvrir)
         Menubar.interface.bind('<Control-s>', Menubar.enregistrer)
         Menubar.interface.bind('<Control-S>', Menubar.enregistrer)
-        
+
         Menubar.interface.bind('<Escape>', Menubar.quitter)
 
     def afficher(self):
@@ -54,7 +54,7 @@ class Menubar:
         path = filedialog.askopenfilename(initialdir = "./Saves/",
                                             title = "Ouvrir",
                                             filetypes = (("Fichier texte","*.txt"), ))
-        if path == '': return False
+        if path == (): return False
 
         fichier = open(path, 'r')
         dico = eval(fichier.read())
@@ -85,7 +85,7 @@ class Menubar:
                                             title = "Enregistrer",
                                             filetypes = (("Fichier texte","*.txt"), ),
                                             defaultextension = ".txt")
-        if path == "":
+        if path == ():
             return False
 
         fichier = open(path, 'w')

@@ -1,7 +1,9 @@
+import time
 import tkinter as tk
-from Matrice import generer_matrice_final as genMatrice, obstacle_matrice, grid_maxValue, grid_minValue, inf_value
+from Matrice import generer_matrice_final as genMatrice, obstacle_matrice, grid_maxValue, grid_minValue, inf_value, gen_random_obstacle
 from Dijkstra import dijkstra
 from A_Star import a_star
+from Worm2D import Worm2D
 from Bezier import bezier_bernstein_4ptsCtrl
 
 
@@ -22,10 +24,12 @@ class Terrain:
         self.path_dijkstra = None
         self.path_a_star = None
         self.path_animated = None
+        self.animation_en_cours = False
         self.left_click_counter = 0
 
         if matrice is None:
             self.matrice = genMatrice(dim)
+            self.matrice = gen_random_obstacle(self.matrice)
         else:
             self.matrice = matrice
 
@@ -71,7 +75,7 @@ class Terrain:
         self.interface.bind("<Control-a>", lambda event : self.animation())
         self.interface.bind("<Control-d>", lambda event : self.animation(True))
         self.interface.bind("<Control-D>", lambda event : self.animation(True))
-            
+
 
     def getCoordCase(self, event):
         x = int(event.x / (self.width/self.dim_terrain))
@@ -139,10 +143,11 @@ class Terrain:
         #print(path)
         for point in self.path_a_star:
             self.draw_oval_point(point, color="blue", size_offset=2)
-    
+
     def animation(self, dijkstra = False):
-        if self.path_animated is not None : 
-            self.canv.delete("animation") #On efface l'ancien chemin dessiné
+        if self.animation_en_cours == True : return
+
+        if self.path_animated is not None :
             self.path_animated = None
 
         #On regarde quelle animation est lancée
@@ -152,23 +157,29 @@ class Terrain:
         else:
             if self.path_a_star is None : return
             self.path_animated = self.path_a_star
-        
+
+        self.animation_en_cours = True
+        worm = Worm2D(self.canv, self.coordCase_coordCanv(self.path_animated[0][0], self.path_animated[0][1])) #On initialise le ver sur la première case de notre chemin
         n = len(self.path_animated)
         coordCanv_fin = self.coordCase_coordCanv(self.path_animated[n-1][0], self.path_animated[n-1][1]) #Coordonnées du point d'arrivée
+        path_worm = []
 
         i = 0
         while i < n:
-            lst_pts_ctrl = [coordCanv_fin] * 4 #Permet de régler le problème du nombre de pts de controle < 4 : 
-                                            #Soit la liste est modifiée dans la boucle d'après
-                                            #Soit les points de controlent sont tous à la fin
+            lst_pts_ctrl = [coordCanv_fin] * 4 #Permet de régler le problème du nombre de pts de controle < 4 :
+                                               #Soit la liste est modifiée dans la boucle d'après
+                                               #Soit les points de controlent sont tous à la fin
             j = 0
             while j < 4 and i + j < n: #4 points de controles pour tracer la courbe de Bézier
                 coordCanv = self.coordCase_coordCanv(self.path_animated[i + j][0], self.path_animated[i + j][1])
                 lst_pts_ctrl[j] = coordCanv
                 j += 1
-            bezier_bernstein_4ptsCtrl(self, lst_pts_ctrl)
+            pts_parcourus = bezier_bernstein_4ptsCtrl(lst_pts_ctrl, worm)
+            path_worm += pts_parcourus
             i += 3 #On incrémente de 3 afin que le dernier point de controle devienne le premier à l'itération suivante
-    
+
+        worm.promenade(path_worm)
+        self.animation_en_cours = False
         return
 
     """
@@ -182,4 +193,5 @@ class Terrain:
         self.path_a_star = None
         self.path_animated = None
         self.matrice = genMatrice(self.dim_terrain)
+        self.matrice = gen_random_obstacle(self.matrice)
         self.dessiner_terrain()

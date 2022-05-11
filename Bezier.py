@@ -1,3 +1,5 @@
+import time
+from Worm2D import Worm2D
 from Utils import horner
 
 """
@@ -10,11 +12,10 @@ def B3p():
     B33 = [1, 0, 0, 0]
     return [B30, B31, B32, B33]
 
-#ATTENTION voir pour éviter de toujourz passer le terrain en arg
-def bezier_bernstein_4ptsCtrl(terrain, ptsControle, nbPtsInterpolation = 100):
+def bezier_bernstein_4ptsCtrl(ptsControle, worm, nbPtsInterpolation = 50):
+    chemin = []
     polynomes = B3p()
     pas = 1/(nbPtsInterpolation + 1)
-    print("ctrl : ", ptsControle)
     u = pas
     while u < 1:
         listePts = []
@@ -30,10 +31,6 @@ def bezier_bernstein_4ptsCtrl(terrain, ptsControle, nbPtsInterpolation = 100):
             M[0] += pts[0]
             M[1] += pts[1]
 
-        oval_size = 5
-        terrain.canv.create_oval(M[0] - 5, M[1] - 5, M[0] + 5, M[1] + 5,
-                                fill = "black",
-                                tags = "animation")
-        
+        chemin.append(M)
         u += pas
-    return
+    return chemin

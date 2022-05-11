@@ -1,4 +1,5 @@
 import numpy as np
+import random
 
 grid_size = 15
 grid_minValue = 1
@@ -53,14 +54,30 @@ def remplacement_bordure(m):
 		m[n - 1 , n - i -1] = inf_value
 	return m
 
+"""
+Génère des obstacles dans la matrice
+"""
 def obstacle_matrice(m, i, j, sizeX = 1, sizeY = 1):
+    dimX = i + sizeX
+    dimY = j + sizeY
+    for x in range(i, dimX):
+        for y in range(j, dimY):
+            if x >= len(m) or y >= len(m): continue
+            m[x, y] = inf_value
+    return m
 
-	dimX = i + sizeX
-	dimY = j + sizeY
-	for x in range(i, dimX):
-		for y in range(j, dimY):
-			m[x, y] = inf_value
-	return m
+def gen_random_obstacle(m):
+    seuil_obstacle = 0.04
+
+    for i in range(1, len(m)-1):
+        for j in range(1, len(m)-1):
+            obs_chance = random.random()
+            if obs_chance >= seuil_obstacle: continue
+            rand_sizeX = random.randrange(1, 4)
+            rand_sizeY = random.randrange(1, 4)
+            m = obstacle_matrice(m, i, j, rand_sizeX, rand_sizeY)
+    return m
+
 
 """
 Renvoi les 8 voisins disponibles de la matrice m, à partir de la position x, y
@@ -75,7 +92,7 @@ def voisins_matrice(m, x, y, get_Indices=False):
 			v_X = x + i
 			v_Y = y + j
 			voisins.append(m[v_X, v_Y])
-			
+
 	return voisins
 
 def voisins_indices_matrice(m, x, y):
