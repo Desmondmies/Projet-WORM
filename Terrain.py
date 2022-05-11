@@ -1,6 +1,4 @@
-import time
-import tkinter as tk
-from Matrice import generer_matrice_final as genMatrice, obstacle_matrice, grid_maxValue, grid_minValue, inf_value, gen_random_obstacle
+from Matrice import generer_matrice_final as genMatrice, grid_maxValue, grid_minValue, inf_value, gen_random_obstacle
 from Dijkstra import dijkstra
 from A_Star import a_star
 from Worm2D import Worm2D
@@ -36,10 +34,6 @@ class Terrain:
         else:
             self.matrice = matrice
 
-        #self.matrice = obstacle_matrice(self.matrice, 2, 5, sizeX=7)
-        #self.matrice = obstacle_matrice(self.matrice, 2, 5, sizeY=3)
-
-        #print(self.matrice)
         self.dessiner_terrain()
 
     """
@@ -222,21 +216,7 @@ class Terrain:
 
             worm1 = Worm2D(self.canv, self.coordCase_coordCanv(self.path_worm_dijkstra[0][0], self.path_worm_dijkstra[0][1])) #On initialise un second ver sur la première case du chemin Dijkstra
             worm2 = Worm2D(self.canv, self.coordCase_coordCanv(self.path_worm_a_star[0][0], self.path_worm_a_star[0][1])) #On initialise un premier ver sur la première case du chemin A*
-            
-            #On exécute les deux processus en parallèle
-            """
-            promenade1 = Thread(target = worm1.promenade, args = (self.path_worm_dijkstra, ))
-            promenade2 = Thread(target = worm2.promenade, args = (self.path_worm_a_star, "worm2", ))
-            promenade1.start() 
-            promenade2.start()
-            """
             Worm2D.course(worm1, worm2, self.path_worm_dijkstra, self.path_worm_a_star)
-
-            #On attend que les processus se terminent
-            """
-            promenade1.join()
-            promenade2.join()
-            """
             self.animation_en_cours = False
         
         return

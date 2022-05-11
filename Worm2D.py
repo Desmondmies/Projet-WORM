@@ -1,5 +1,5 @@
-from threading import Thread
 import time
+
 class Worm2D:
     def __init__(self, canvas, pos_tete):
         self.canv = canvas
@@ -17,22 +17,14 @@ class Worm2D:
 
     @staticmethod
     def course(worm1, worm2, path1, path2):
-        thread1 = Thread(
-            target = Worm2D.promenade, args=(worm1, path1)
-        )
+        max_step = len(path1) if len(path1) >= len(path2) else len(path2)
 
-        thread2 = Thread(
-            target = Worm2D.promenade, args=(worm2, path2, "worm2")
-        )
-
-        thread1.start()
-        thread2.start()
-
-        """
-        prom1 = loop.create_task(worm1.promenade(path1))
-        prom2 = loop.create_task(worm2.promenade(path2, "worm2"))
-        await asyncio.wait([prom1, prom2])
-        """
+        for step in range(0, max_step):
+            if step < len(path1):
+                worm1.draw_worm(path1[step])
+            if step < len(path2):
+                worm2.draw_worm(path2[step], "worm2")
+            time.sleep(0.025)
 
     def promenade(self, path, tagWorm = "worm"):
         for pts in path:
