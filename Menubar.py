@@ -25,7 +25,7 @@ class Menubar:
     def menubar_set_fichier(self, fichier):
         fichier.add_command(label = "Nouveau", command = self.nouveau)
         fichier.add_command(label = "Ouvrir", command = self.ouvrir)
-        fichier.add_command(label = "Enregistrer sous...", command = self.enregistrer)#, state = "disabled")
+        fichier.add_command(label = "Enregistrer sous...", command = self.enregistrer)
         fichier.add_command(label = "Quitter", command = self.quitter)
 
         Menubar.interface.bind('<Control-n>', Menubar.nouveau)
@@ -54,7 +54,7 @@ class Menubar:
         path = filedialog.askopenfilename(initialdir = "./Saves/",
                                             title = "Ouvrir",
                                             filetypes = (("Fichier texte","*.txt"), ))
-        if path == (): return False
+        if path == () or path == '': return False
 
         fichier = open(path, 'r')
         dico = eval(fichier.read())
@@ -85,8 +85,7 @@ class Menubar:
                                             title = "Enregistrer",
                                             filetypes = (("Fichier texte","*.txt"), ),
                                             defaultextension = ".txt")
-        if path == ():
-            return False
+        if path == () or path == '': return False
 
         fichier = open(path, 'w')
         dico = {"matrice" : Menubar.interface.terrain.matrice.tolist(),

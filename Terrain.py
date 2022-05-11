@@ -74,10 +74,12 @@ class Terrain:
 
     def bind_terrain(self):
         self.canv.bind("<Button-1>", self.left_click)
-        self.interface.bind("<Control-A>", lambda event : self.animation())
-        self.interface.bind("<Control-a>", lambda event : self.animation())
-        self.interface.bind("<Control-d>", lambda event : self.animation(True))
-        self.interface.bind("<Control-D>", lambda event : self.animation(True))
+        self.interface.bind("<Control-A>", lambda event : self.animation(False))
+        self.interface.bind("<Control-a>", lambda event : self.animation(False))
+        self.interface.bind("<Control-d>", lambda event : self.animation(False, True))
+        self.interface.bind("<Control-D>", lambda event : self.animation(False, True))
+        self.interface.bind("<Control-c>", lambda event : self.animation(True))
+        self.interface.bind("<Control-C>", lambda event : self.animation(True))
 
 
     def getCoordCase(self, event):
@@ -98,6 +100,7 @@ class Terrain:
     """
     def left_click(self, event):
         pt_coord = self.getCoordCase(event)
+        
         #Si on sélectionne une case infranchissable ou si une animation est en cours
         if self.matrice[pt_coord[1]+1, pt_coord[0]+1] == inf_value: return
         if self.animation_en_cours:
@@ -140,13 +143,14 @@ class Terrain:
         pb = [self.point_b[0] + 1, self.point_b[1] + 1]
         self.path_dijkstra = dijkstra(self.matrice, pa, pb)
         self.tracer_path_dijkstra()
-        self.calculer_bezier(self.path_dijkstra) #On calcule bézier une seule fois, pas à chaque lancement d'animation
         return
 
     def tracer_path_dijkstra(self):
         if self.path_dijkstra is None: return
         for point in self.path_dijkstra:
             self.draw_oval_point(point)
+        self.calculer_bezier(self.path_dijkstra) #On calcule bézier une seule fois, pas à chaque lancement d'animation
+        return
 
     def cherche_path_a_star(self):
         #Coordonnées de pa et pb en tenant compte de la bordure
@@ -154,6 +158,12 @@ class Terrain:
         pb = [self.point_b[0] + 1, self.point_b[1] + 1]
         self.path_a_star = a_star(self.matrice, pa, pb)
         self.tracer_path_a_star()
+        return
+
+    def tracer_path_a_star(self):
+        if self.path_a_star is None: return
+        for point in self.path_a_star:
+            self.draw_oval_point(point, color="blue", size_offset=2)
         self.calculer_bezier(self.path_a_star, False) #On calcule bézier une seule fois, pas à chaque lancement d'animation
         return
     
@@ -189,27 +199,45 @@ class Terrain:
             i += 3 #On incrémente de 3 afin que le dernier point de contrôle devienne le premier à l'itération suivante
         return
 
-    def tracer_path_a_star(self):
-        if self.path_a_star is None: return
-        for point in self.path_a_star:
-            self.draw_oval_point(point, color="blue", size_offset=2)
+    def animation(self, course = False, dijkstra = False):
+        if self.animation_en_cours or self.path_dijkstra is None or self.path_a_star is None : return
 
-    def animation(self, dijkstra = False):
-        if self.animation_en_cours == True : return
+        #Si on ne lance pas une course de vers
+        if not course:
+            #On regarde quelle animation est lancée
+            if dijkstra :
+                path_animated = self.path_worm_dijkstra
+            else:
+                path_animated = self.path_worm_a_star
 
-        #On regarde quelle animation est lancée
-        if dijkstra :
-            if self.path_dijkstra is None : return
-            path_animated = self.path_worm_dijkstra
+            self.animation_en_cours = True
+            worm = Worm2D(self.canv, self.coordCase_coordCanv(path_animated[0][0], path_animated[0][1])) #On initialise le ver sur la première case de notre chemin
+            
+            worm.promenade(path_animated) #Permet d'exécuter une seule fonction asynchrone
+            self.animation_en_cours = False
+
+        #Sinon on est en mode course
         else:
-            if self.path_a_star is None : return
-            path_animated = self.path_worm_a_star
+            self.animation_en_cours = True
 
-        self.animation_en_cours = True
-        worm = Worm2D(self.canv, self.coordCase_coordCanv(path_animated[0][0], path_animated[0][1])) #On initialise le ver sur la première case de notre chemin
-        
-        worm.promenade(path_animated)
-        self.animation_en_cours = False
+            worm1 = Worm2D(self.canv, self.coordCase_coordCanv(self.path_worm_dijkstra[0][0], self.path_worm_dijkstra[0][1])) #On initialise un second ver sur la première case du chemin Dijkstra
+            worm2 = Worm2D(self.canv, self.coordCase_coordCanv(self.path_worm_a_star[0][0], self.path_worm_a_star[0][1])) #On initialise un premier ver sur la première case du chemin A*
+            
+            #On exécute les deux processus en parallèle
+            """
+            promenade1 = Thread(target = worm1.promenade, args = (self.path_worm_dijkstra, ))
+            promenade2 = Thread(target = worm2.promenade, args = (self.path_worm_a_star, "worm2", ))
+            promenade1.start() 
+            promenade2.start()
+            """
+            Worm2D.course(worm1, worm2, self.path_worm_dijkstra, self.path_worm_a_star)
+
+            #On attend que les processus se terminent
+            """
+            promenade1.join()
+            promenade2.join()
+            """
+            self.animation_en_cours = False
         
         return
 
