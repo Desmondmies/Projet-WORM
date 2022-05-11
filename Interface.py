@@ -46,7 +46,7 @@ if __name__ == "__main__":
     interface = Interface()
 
     interface.creer_menubar()
-    interface.creer_terrain(30)
+    interface.creer_terrain(20)
 
     interface.afficher()
 

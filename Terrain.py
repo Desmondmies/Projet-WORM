@@ -23,7 +23,10 @@ class Terrain:
         self.point_b = None
         self.path_dijkstra = None
         self.path_a_star = None
-        self.path_animated = None
+
+        self.path_worm_a_star = []
+        self.path_worm_dijkstra = []
+
         self.animation_en_cours = False
         self.left_click_counter = 0
 
@@ -82,14 +85,24 @@ class Terrain:
         y = int(event.y / (self.height/self.dim_terrain))
         return [x, y]
 
+    """
+    Convertit des coordonnées matricielles en coordonnées pour le canvas
+    """
     def coordCase_coordCanv(self, x, y):
         coordX = x * self.dimCaseX - int(self.dimCaseX/2)
         coordY = y * self.dimCaseY - int(self.dimCaseY/2)
         return [coordX, coordY]
 
+    """
+    Gère le fait que le clique gauche place à la fois le point de départ ET d'arrivée
+    """
     def left_click(self, event):
         pt_coord = self.getCoordCase(event)
+        #Si on sélectionne une case infranchissable ou si une animation est en cours
         if self.matrice[pt_coord[1]+1, pt_coord[0]+1] == inf_value: return
+        if self.animation_en_cours:
+            print("Veuillez attendre la fin de l'animation")
+            return
 
         if self.left_click_counter == 0:
             self.point_a = pt_coord
@@ -99,10 +112,13 @@ class Terrain:
         self.left_click_counter = (self.left_click_counter + 1) % 2
         self.update_path()
 
+    """
+    Permet de lancer les recherches de plus court chemin si le point de départ et d'arrivée sont initialisés
+    """
     def update_path(self):
         if self.point_a is None or self.point_b is None: return
         self.canv.delete("path")
-        self.canv.delete("animation")
+        self.canv.delete("worm")
         self.cherche_path_a_star()
         self.cherche_path_dijkstra()
         self.point_a = None
@@ -124,10 +140,11 @@ class Terrain:
         pb = [self.point_b[0] + 1, self.point_b[1] + 1]
         self.path_dijkstra = dijkstra(self.matrice, pa, pb)
         self.tracer_path_dijkstra()
+        self.calculer_bezier(self.path_dijkstra) #On calcule bézier une seule fois, pas à chaque lancement d'animation
+        return
 
     def tracer_path_dijkstra(self):
         if self.path_dijkstra is None: return
-        #print(path)
         for point in self.path_dijkstra:
             self.draw_oval_point(point)
 
@@ -137,61 +154,84 @@ class Terrain:
         pb = [self.point_b[0] + 1, self.point_b[1] + 1]
         self.path_a_star = a_star(self.matrice, pa, pb)
         self.tracer_path_a_star()
+        self.calculer_bezier(self.path_a_star, False) #On calcule bézier une seule fois, pas à chaque lancement d'animation
+        return
+    
+    """
+    Calcule les coordonnées dans le canvas du chemin à parcourir à partir d'un chemin contenant des coordonnées matricielles
+    """
+    def calculer_bezier(self, path, dijkstra = True):
+        if dijkstra:
+            self.path_worm_dijkstra = []
+        else:
+            self.path_worm_a_star = []
+
+        n = len(path)
+        coordCanv_fin = self.coordCase_coordCanv(path[n-1][0], path[n-1][1]) #Coordonnées du point d'arrivée
+
+        i = 0
+        while i < n:
+            lst_pts_ctrl = [coordCanv_fin] * 4 #Permet de régler le problème du nombre de pts de controles < 4 :
+                                               #Soit la liste est modifiée dans la boucle d'après
+                                               #Soit les points de controlent sont tous à la fin
+            j = 0
+            while j < 4 and i + j < n: #4 points de controles pour tracer la courbe de Bézier
+                coordCanv = self.coordCase_coordCanv(path[i + j][0], path[i + j][1])
+                lst_pts_ctrl[j] = coordCanv
+                j += 1
+            pts_parcourus = bezier_bernstein_4ptsCtrl(lst_pts_ctrl)
+
+            if dijkstra:
+                self.path_worm_dijkstra += pts_parcourus
+            else:
+                self.path_worm_a_star += pts_parcourus
+
+            i += 3 #On incrémente de 3 afin que le dernier point de contrôle devienne le premier à l'itération suivante
+        return
 
     def tracer_path_a_star(self):
         if self.path_a_star is None: return
-        #print(path)
         for point in self.path_a_star:
             self.draw_oval_point(point, color="blue", size_offset=2)
 
     def animation(self, dijkstra = False):
         if self.animation_en_cours == True : return
 
-        if self.path_animated is not None :
-            self.path_animated = None
-
         #On regarde quelle animation est lancée
         if dijkstra :
             if self.path_dijkstra is None : return
-            self.path_animated = self.path_dijkstra
+            path_animated = self.path_worm_dijkstra
         else:
             if self.path_a_star is None : return
-            self.path_animated = self.path_a_star
+            path_animated = self.path_worm_a_star
 
         self.animation_en_cours = True
-        worm = Worm2D(self.canv, self.coordCase_coordCanv(self.path_animated[0][0], self.path_animated[0][1])) #On initialise le ver sur la première case de notre chemin
-        n = len(self.path_animated)
-        coordCanv_fin = self.coordCase_coordCanv(self.path_animated[n-1][0], self.path_animated[n-1][1]) #Coordonnées du point d'arrivée
-        path_worm = []
-
-        i = 0
-        while i < n:
-            lst_pts_ctrl = [coordCanv_fin] * 4 #Permet de régler le problème du nombre de pts de controle < 4 :
-                                               #Soit la liste est modifiée dans la boucle d'après
-                                               #Soit les points de controlent sont tous à la fin
-            j = 0
-            while j < 4 and i + j < n: #4 points de controles pour tracer la courbe de Bézier
-                coordCanv = self.coordCase_coordCanv(self.path_animated[i + j][0], self.path_animated[i + j][1])
-                lst_pts_ctrl[j] = coordCanv
-                j += 1
-            pts_parcourus = bezier_bernstein_4ptsCtrl(lst_pts_ctrl, worm)
-            path_worm += pts_parcourus
-            i += 3 #On incrémente de 3 afin que le dernier point de controle devienne le premier à l'itération suivante
-
-        worm.promenade(path_worm)
+        worm = Worm2D(self.canv, self.coordCase_coordCanv(path_animated[0][0], path_animated[0][1])) #On initialise le ver sur la première case de notre chemin
+        
+        worm.promenade(path_animated)
         self.animation_en_cours = False
+        
         return
 
     """
     Permet de renouveler la matrice de couts liée au terrain
     """
     def nouveau_terrain(self):
+        if self.animation_en_cours : 
+            print("Veuillez attendre la fin de l'animation")
+            return
+
         self.canv.delete("all")
         self.point_a = None #Permet d'éviter de sélectionner 2 points sur des terrains différents
         self.point_b = None
+
         self.path_dijkstra = None
         self.path_a_star = None
-        self.path_animated = None
+        self.path_worm_a_star = []
+        self.path_worm_dijkstra = []
+
         self.matrice = genMatrice(self.dim_terrain)
         self.matrice = gen_random_obstacle(self.matrice)
+        
         self.dessiner_terrain()
+        return

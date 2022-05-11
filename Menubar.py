@@ -91,7 +91,9 @@ class Menubar:
         fichier = open(path, 'w')
         dico = {"matrice" : Menubar.interface.terrain.matrice.tolist(),
                 "path_dijkstra" : Menubar.interface.terrain.path_dijkstra,
-                "path_a_star" : Menubar.interface.terrain.path_a_star}
+                "path_a_star" : Menubar.interface.terrain.path_a_star,
+                "bezier_dijkstra" : Menubar.interface.terrain.path_worm_dijkstra,
+                "bezier_a_star" : Menubar.interface.terrain.path_worm_a_star}
 
         fichier.write(str(dico))
 

@@ -12,7 +12,7 @@ def B3p():
     B33 = [1, 0, 0, 0]
     return [B30, B31, B32, B33]
 
-def bezier_bernstein_4ptsCtrl(ptsControle, worm, nbPtsInterpolation = 50):
+def bezier_bernstein_4ptsCtrl(ptsControle, nbPtsInterpolation = 50):
     chemin = []
     polynomes = B3p()
     pas = 1/(nbPtsInterpolation + 1)
