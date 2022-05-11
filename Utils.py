@@ -1,4 +1,4 @@
-from math import sqrt, acos
+from math import sqrt
 
 def produit_vec(u, v):
 	if len(u) != len(v):
@@ -16,18 +16,6 @@ def normalize_vec(v):
 def calc_vec(pts1, pts2):
 	return [pts2[0] - pts1[0], pts2[1] - pts1[1], pts2[2] - pts1[2]]
 
-def angle(u, v):
-	prod = produit_vec(u, v)
-	norm_U = normalize_vec(u)
-	norm_V = normalize_vec(v)
-	value = prod[1] / (norm_U[1] * norm_V[1])
-	if value < -1:
-		value = -1
-	elif value > 1:
-		value = 1
-	angle = acos( value )
-	return angle
-
 def substract_list(a, b):
 	tmp = [ a[0] - b[0], a[1] - b[1], a[2] - b[2] ]
 	return tmp
@@ -43,3 +31,18 @@ def moyenne_pos_quad(quad):
 	moy_pos[2] /= len(quad)
 
 	return moy_pos
+
+def convert_FromPixel_to_Terrain(pixelPos, tailleMatrice):
+	defaultResolution = 500
+	new_pos = [0, 0]
+
+	new_pos[0] = pixelPos[0]
+	new_pos[1] = pixelPos[1]
+
+	new_pos[0] /= defaultResolution
+	new_pos[1] /= defaultResolution
+	
+	new_pos[0] *= tailleMatrice
+	new_pos[1] *= tailleMatrice
+
+	return new_pos

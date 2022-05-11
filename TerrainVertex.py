@@ -109,8 +109,8 @@ def gen_terrain_quad(matrice):
 	for i in range(1, n-1):
 		ligne = []
 		for j in range(1, n-1):
-			if matrice[i, j] != inf_value:
-				y = matrice[i, j] / 2
+			if matrice[i][j] != inf_value:
+				y = matrice[i][j] / 2
 			else:
 				y = -1
 			quad = get_quad(j, y, i)
