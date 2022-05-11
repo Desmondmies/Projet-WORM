@@ -1,5 +1,3 @@
-import time
-from Worm2D import Worm2D
 from Utils import horner
 
 """

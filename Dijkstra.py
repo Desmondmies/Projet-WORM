@@ -21,9 +21,6 @@ def dijkstra(mat, point_depart, point_arrive):
 	numCase_depart = coord_numCase(point_depart[0], point_depart[1], dim_mat)
 	numCase_arrive = coord_numCase(point_arrive[0], point_arrive[1], dim_mat)
 
-	#print("depart : ", numCase_depart)
-	#print("arrive : ", numCase_arrive)
-
 	t = [None] * (dim_mat * dim_mat)
 
 	d = [None] * (dim_mat * dim_mat)
@@ -32,9 +29,6 @@ def dijkstra(mat, point_depart, point_arrive):
 			numCase = coord_numCase(x, y, dim_mat)
 			d[numCase] = [np.inf, numCase] #Lorsque d sera converti en tas, on perdra le numéro de la case associée à ce coût
 	d[numCase_depart][0] = 0
-
-	#print("d :\n", d)
-	#print("-" * 100)
 
 	#On a d sous forme de liste pour récupérer le cout d'une case (d[numCase] = [coutCumulé, numCase]).
 	#On a F sous la forme d'un tas pour récupérer la case du chemin avec un cout minimale plus efficacement.
@@ -45,16 +39,10 @@ def dijkstra(mat, point_depart, point_arrive):
 	del F[0:dim_mat]
 	del F[len(F) - dim_mat:len(F)]
 
-	#print(" F supp lignes :\n", F)
-	#print("-" * 100)
-
 		#Suppression des colonnes de la bordure
 	for i in range(0, dim_terrain * dim_terrain, dim_terrain):
 		del F[i]
 		del F[i + dim_terrain]
-
-	#print(" F final :\n", F)
-	#print("-" * 100)
 
 	heapify(F)
 
@@ -64,13 +52,8 @@ def dijkstra(mat, point_depart, point_arrive):
 		if s0[1] == numCase_arrive:
 			return traitement_trace(numCase_depart, numCase_arrive)
 
-		#print("s0[1] :", s0[1])
-
 		#pour tout voisin de s0, calcul distance et cout
 		liste_numVoisins = num_cases_voisines(s0[1], dim_mat)
-
-		#print("voisins de", s0[1], ":", liste_numVoisins)
-		#print("-" * 100)
 
 		for numVoisin in liste_numVoisins:
 			s1 = d[numVoisin] #s1 = [cout cumulé, numCase dans la MATRICE]

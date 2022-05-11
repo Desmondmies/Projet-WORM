@@ -9,12 +9,7 @@ class CaseMatrice():
 		self._x = x
 		self._y = y
 
-		#prévention pour A*
-		#self.gCost = 0
-		#self.hCost = 0
-
 	def __repr__(self):
-		#return "(" + str(self.X) + "," + str(self.Y) + " : " + str(self.Value) + ")"
 		return str(self.Value)
 
 	def __lt__(self, other):
@@ -47,23 +42,3 @@ class CaseMatrice():
 	@Y.setter
 	def Y(self, value):
 		self._y = value
-
-	"""
-	En prévention pour algo A*
-
-	@property
-	def Gcost(self):
-		return self._gCost
-	@Gcost.setter
-	def Gcost(self, value):
-		self._gCost = value
-	@property
-	def Hcost(self):
-		return self._hCost
-	@Hcost.setter
-	def Hcost(self, value):
-		self._hCost = value
-	@property
-	def Fcost(self):
-		return self._gCost + self._hCost
-	"""

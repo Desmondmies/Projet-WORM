@@ -2,17 +2,6 @@ from Utils import calc_vec, normalize_vec, produit_vec
 from Matrice import inf_value
 
 """
-def get_vertex(i, j):
-    v = [ 2*i, 0, 2*j,
-          2*(i+1), 0, 2*(j+1),
-          2*i, 0, 2*(j+1),
-          2*i, 0, 2*j,
-          2*(i+1), 0, 2*j,
-          2*(i+1), 0, 2*(j+1)]
-    return v
-"""
-
-"""
 Renvoi les 4 coordonnées nécéssaires à la définition d'1 quadrilatère
 """
 def get_quad(i, y, j):
