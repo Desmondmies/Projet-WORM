@@ -31,3 +31,15 @@ def angle(u, v):
 def substract_list(a, b):
 	tmp = [ a[0] - b[0], a[1] - b[1], a[2] - b[2] ]
 	return tmp
+
+def moyenne_pos_quad(quad):
+	moy_pos = [0, 0, 0]
+	for vertice in quad:
+		moy_pos[0] += vertice[0]
+		moy_pos[1] += vertice[1]
+		moy_pos[2] += vertice[2]
+	moy_pos[0] /= len(quad)
+	moy_pos[1] /= len(quad)
+	moy_pos[2] /= len(quad)
+
+	return moy_pos

@@ -4,7 +4,8 @@ from OpenGL.GLUT import *
 
 from Matrice import generer_matrice_final, obstacle_matrice, grid_maxValue, gen_random_obstacle
 from TerrainVertex import gen_terrain_data
-from Worm import draw_worm, worm_moveX, worm_moveZ, init_worm
+from Worm import draw_worm, worm_moveX, worm_moveZ, init_worm, getWormPosition
+from Camera3D import cam_lookAt, switch_cam, getCameraMode
 
 window_name = "TEST MAILLAGE"
 width, height = 750, 750
@@ -31,11 +32,13 @@ def init_light():
 
 def init():
     global quadric, vertices, normals, terrainData
-    glClearColor(0.0, 0.0, 0.0, 0.0)
+    glClearColor(12 / 255, 31 / 255, 50 / 255, 0.0) #20 53 85
 
     glEnable(GL_DEPTH_TEST)
 
     init_light()
+
+	#test données bezier
 
     m = generer_matrice_final(taille_matrice)
     #m = obstacle_matrice(m, 4, 3, sizeX=4) #place un obstacle
@@ -45,7 +48,7 @@ def init():
 
     glShadeModel(GL_SMOOTH)
     quadric = gluNewQuadric()
-    init_worm(quadric)
+    init_worm(quadric, terrainData)
     #gluQuadricDrawStyle(quadric, GLU_LINE)
 
 def material_obstacle():
@@ -91,82 +94,96 @@ def draw_triangle(tr):
     draw_pts(tr[3])
 
 def display_terrain():
-    #terrainData => [ quads, paliers, centres ]
-    #quads => [ [quad, quad, quad], [quad, quad, quad]]
+	#terrainData => [ quads, paliers, centres ]
+	#quads => [ [quad, quad, quad], [quad, quad, quad]]
 
-    glBegin(GL_QUADS)
+	glBegin(GL_QUADS)
 
-    #dessine tout les QUADS
-    glNormal(0, 1, 0) #normal de 1 sur l'axe y pour chaque quad
-    for ligneQuad in terrainData["Quads"]:
-        for quad in ligneQuad:
-            draw_quad(quad)
+	#dessine tout les QUADS
+	glNormal(0, 1, 0) #normal de 1 sur l'axe y pour chaque quad
+	for ligneQuad in terrainData["Quads"]:
+		for quad in ligneQuad:
+			draw_quad(quad)
 
-    #dessine tout les PALIERS
-    for palier in terrainData["Paliers"]:
-        normal = palier[0]
-        glNormal(normal[0], normal[1], normal[2])
-        draw_pts(palier[1])
-        draw_pts(palier[2])
-        draw_pts(palier[3])
-        draw_pts(palier[4])
-    glEnd()
+	#dessine tout les PALIERS
+	for palier in terrainData["Paliers"]:
+	    normal = palier[0]
+	    glNormal(normal[0], normal[1], normal[2])
+	    draw_pts(palier[1])
+	    draw_pts(palier[2])
+	    draw_pts(palier[3])
+	    draw_pts(palier[4])
+	glEnd()
 
-    glBegin(GL_TRIANGLES)
-    #dessine tout les CENTRES
-    for centres in terrainData["Centres"]:
-        draw_triangle(centres[0])
-        draw_triangle(centres[1])
-    glEnd()
+	glBegin(GL_TRIANGLES)
+	#dessine tout les CENTRES
+	for centres in terrainData["Centres"]:
+	    draw_triangle(centres[0])
+	    draw_triangle(centres[1])
+	glEnd()
+
+def display_camera():
+	if getCameraMode() == False:
+		glTranslatef(0.0, 0.0, cam_MoveZ)
+		glRotatef(cam_MoveX, 0.0, 1.0, 0.0)
+	else:
+		pos = getWormPosition()
+		glTranslatef(-(pos[0] - terrain_offset), 0, -(pos[2] - terrain_offset))
 
 
 def display():
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
 
-    glPushMatrix()
-    glTranslatef(0.0, 0.0, cam_MoveZ)
-    glRotatef(cam_MoveX, 0.0, 1.0, 0.0)
+	glPushMatrix()
 
-    glPushMatrix()
-    glTranslatef(- terrain_offset, 0.0, - terrain_offset) #décale le terrain au milieu de l'écran
+	display_camera()
 
-    display_terrain() #dessine le terrain
+	glPushMatrix()
+	glTranslatef(- terrain_offset, 0.0, - terrain_offset) #décale le terrain au milieu de l'écran
 
-    #draw_worm(quadric) #dessine le ver
-    draw_worm()
+	display_terrain() #dessine le terrain
 
-    glPopMatrix()
-    glPopMatrix()
-    glutSwapBuffers()
+	#draw_worm(quadric) #dessine le ver
+	draw_worm()
+
+	glPopMatrix()
+	glPopMatrix()
+	glutSwapBuffers()
 
 def reshape(width, height):
-    ar = float(width / height)
-    glViewport(0, 0, width, height)
-    glMatrixMode(GL_PROJECTION)
-    glLoadIdentity() #remplace la matrice actuel avec la matrice identité
+	ar = float(width / height)
+	glViewport(0, 0, width, height)
+	glMatrixMode(GL_PROJECTION)
+	glLoadIdentity() #remplace la matrice actuel avec la matrice identité
 
-    gluPerspective(70, ar, 1, 1000) # (fov Y, aspect ratio, z NearPlane, z FarPlane)
-    glMatrixMode(GL_MODELVIEW)
-    glLoadIdentity()
+	gluPerspective(70, ar, 1, 1000) # (fov Y, aspect ratio, z NearPlane, z FarPlane)
+	glMatrixMode(GL_MODELVIEW)
+	glLoadIdentity()
 
-    # Positionne la caméra assez loin et un peu plus haut pour regarder le terrain
-    gluLookAt(0.0, taille_matrice + 2, taille_matrice * 2,
-    0.0, 0.0, 0.0,
-    0.0, 1.0, 0.0)
+	# Positionne la caméra assez loin et un peu plus haut pour regarder le terrain
+
+	#gluLookAt ( Position Caméra X Y Z, Caméra Target X Y Z, Vecteur vers le haut X Y Z )
+	#gluLookAt(0.0, taille_matrice + 2, taille_matrice * 2,
+	#0.0, 0.0, 0.0,
+	#0.0, 1.0, 0.0)
+	cam_lookAt( (0, taille_matrice+2, taille_matrice*2), (0, 0, 0), (0, 1, 0) )
 
 def keyboard(key, x, y):
-    global cam_MoveX, cam_MoveZ
+	global cam_MoveX, cam_MoveZ
 
-    if key == b'z':
-        cam_MoveZ = (cam_MoveZ + 0.5) % 360
-    elif key == b's':
-        cam_MoveZ = (cam_MoveZ - 0.5) % 360
-    if key == b'q':
-        cam_MoveX = (cam_MoveX + 2) % 360
-    elif key == b'd':
-        cam_MoveX = (cam_MoveX - 2) % 360
+	if key == b'z':
+		cam_MoveZ = (cam_MoveZ + 0.5) % 360
+	elif key == b's':
+		cam_MoveZ = (cam_MoveZ - 0.5) % 360
+	if key == b'q':
+		cam_MoveX = (cam_MoveX + 2) % 360
+	elif key == b'd':
+		cam_MoveX = (cam_MoveX - 2) % 360
 
-    glutPostRedisplay()
+	if key == b'c':
+		switch_cam(width, height)
+
+	glutPostRedisplay()
 
 def special_func(key, x, y):
     """
