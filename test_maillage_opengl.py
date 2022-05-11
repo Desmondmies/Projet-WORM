@@ -218,10 +218,10 @@ def display():
 	display_point_depart()
 	display_point_arrivee()
 
-	if worm_animation_frame < len(bezier_dijkstra)-1:
+	if worm_animation_frame < len(bezier_dijkstra):
 		new_d_pos = convert_FromPixel_to_Terrain( bezier_dijkstra[ int(worm_animation_frame) ], len(terrainData["Quads"]) )
 		worm_D.set_wormPosition(new_d_pos[0]-0.1, new_d_pos[1]-0.1)
-	if worm_animation_frame < len(bezier_a_star)-1:
+	if worm_animation_frame < len(bezier_a_star):
 		new_a_pos = convert_FromPixel_to_Terrain( bezier_a_star[ int(worm_animation_frame) ], len(terrainData["Quads"]) )
 		worm_A.set_wormPosition(new_a_pos[0]-0.1, new_a_pos[1]-0.1)
 
