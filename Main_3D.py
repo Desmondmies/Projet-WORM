@@ -4,13 +4,13 @@ from OpenGL.GL import *
 from OpenGL.GLU import *
 from OpenGL.GLUT import *
 
-from Matrice import grid_maxValue
-from TerrainVertex import gen_terrain_data
-from Camera3D import cam_lookAt, switch_cam, getCameraMode
-from Utils import moyenne_pos_quad, convert_FromPixel_to_Terrain
-from Worm3D import Worm3D
+from Matrice.Matrice import grid_maxValue
+from _3D.TerrainVertex import gen_terrain_data
+from _3D.Camera3D import cam_lookAt, switch_cam, getCameraMode
+from _3D.Worm3D import Worm3D
+from Utilitaires.Utils import moyenne_pos_quad, convert_FromPixel_to_Terrain
 
-window_name = "TEST MAILLAGE"
+window_name = "Projet WORM - 3D Edition"
 width, height = 750, 750
 
 taille_matrice = 15

@@ -1,5 +1,5 @@
-from Utils import calc_vec, normalize_vec, produit_vec
-from Matrice import inf_value
+from Utilitaires.Utils import calc_vec, normalize_vec, produit_vec
+from Matrice.Matrice import inf_value
 
 """
 Renvoi les 4 coordonnées nécéssaires à la définition d'1 quadrilatère

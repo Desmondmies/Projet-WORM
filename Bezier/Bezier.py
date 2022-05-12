@@ -1,4 +1,4 @@
-from Utils import horner
+from Utilitaires.Utils import horner
 
 """
 Polynomes bernstein pour 4 points de controles.

@@ -1,7 +1,7 @@
 import numpy as np
 from heapq import heappop, heapify
-from Matrice import num_cases_voisines
-from Utils import coord_numCase, numCase_coord
+from Matrice.Matrice import num_cases_voisines
+from Utilitaires.Utils import coord_numCase, numCase_coord
 
 d = []
 t = []

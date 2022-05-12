@@ -1,6 +1,6 @@
 import tkinter as tk
-from Terrain import Terrain
-from Menubar import Menubar
+from _2D.Terrain import Terrain
+from _2D.Menubar import Menubar
 
 class Interface:
     def __init__(self, width = 500, height = 500):

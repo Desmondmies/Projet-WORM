@@ -2,7 +2,7 @@ from OpenGL.GL import *
 from OpenGL.GLU import *
 from OpenGL.GLUT import *
 
-from Utils import normalize_vec, substract_list, moyenne_pos_quad
+from Utilitaires.Utils import normalize_vec, substract_list, moyenne_pos_quad
 
 class Worm3D:
     def __init__(self, _quadric, terrainData, _worm_len = 7, _IsDijkstra = False) -> None:
