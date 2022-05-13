@@ -68,13 +68,6 @@ class Terrain:
 
     def bind_terrain(self):
         self.canv.bind("<Button-1>", self.left_click)
-        self.interface.bind("<Control-A>", lambda event : self.animation(False))
-        self.interface.bind("<Control-a>", lambda event : self.animation(False))
-        self.interface.bind("<Control-d>", lambda event : self.animation(False, True))
-        self.interface.bind("<Control-D>", lambda event : self.animation(False, True))
-        self.interface.bind("<Control-c>", lambda event : self.animation(True))
-        self.interface.bind("<Control-C>", lambda event : self.animation(True))
-
 
     def getCoordCase(self, event):
         x = int(event.x / (self.width/self.dim_terrain))
@@ -115,8 +108,6 @@ class Terrain:
     def update_path(self):
         if self.point_a is None or self.point_b is None: return
         self.canv.delete("path")
-        self.canv.delete("worm")
-        self.canv.delete("worm2")
         self.cherche_path_a_star()
         self.cherche_path_dijkstra()
         self.point_a = None
@@ -215,10 +206,13 @@ class Terrain:
         else:
             self.animation_en_cours = True
 
-            worm1 = Worm2D(self.canv, self.coordCase_coordCanv(self.path_worm_dijkstra[0][0], self.path_worm_dijkstra[0][1])) #On initialise un second ver sur la première case du chemin Dijkstra
-            worm2 = Worm2D(self.canv, self.coordCase_coordCanv(self.path_worm_a_star[0][0], self.path_worm_a_star[0][1])) #On initialise un premier ver sur la première case du chemin A*
+            worm1 = Worm2D(self.canv, self.coordCase_coordCanv(self.path_worm_dijkstra[0][0], self.path_worm_dijkstra[0][1])) #On initialise un premier ver sur la première case du chemin Dijkstra
+            worm2 = Worm2D(self.canv, self.coordCase_coordCanv(self.path_worm_a_star[0][0], self.path_worm_a_star[0][1])) #On initialise un second ver sur la première case du chemin A*
             Worm2D.course(worm1, worm2, self.path_worm_dijkstra, self.path_worm_a_star)
             self.animation_en_cours = False
+        
+        self.canv.delete("worm")
+        self.canv.delete("worm2")
         
         return
 

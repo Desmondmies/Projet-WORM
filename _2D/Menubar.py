@@ -17,10 +17,13 @@ class Menubar:
         self.menubar = tk.Menu(interface.root)
 
         self.fichier = tk.Menu(self.menubar, tearoff = 0)
+        self.animation = tk.Menu(self.menubar, tearoff = 0)
 
         self.menubar_set_fichier(self.fichier)
+        self.menubar_set_animation(self.animation)
 
         self.menubar.add_cascade(label = "Fichier", menu = self.fichier)
+        self.menubar.add_cascade(label = "Animation", menu = self.animation)
 
     def menubar_set_fichier(self, fichier):
         fichier.add_command(label = "Nouveau", command = self.nouveau)
@@ -28,15 +31,30 @@ class Menubar:
         fichier.add_command(label = "Enregistrer sous...", command = self.enregistrer)
         fichier.add_command(label = "Quitter", command = self.quitter)
 
-        Menubar.interface.bind('<Control-n>', Menubar.nouveau)
-        Menubar.interface.bind('<Control-N>', Menubar.nouveau)
-        Menubar.interface.bind('<Control-o>', Menubar.ouvrir)
-        Menubar.interface.bind('<Control-O>', Menubar.ouvrir)
-        Menubar.interface.bind('<Control-s>', Menubar.enregistrer)
-        Menubar.interface.bind('<Control-S>', Menubar.enregistrer)
+        Menubar.interface.bind('<Control-n>', self.nouveau)
+        Menubar.interface.bind('<Control-N>', self.nouveau)
+        Menubar.interface.bind('<Control-o>', self.ouvrir)
+        Menubar.interface.bind('<Control-O>', self.ouvrir)
+        Menubar.interface.bind('<Control-s>', self.enregistrer)
+        Menubar.interface.bind('<Control-S>', self.enregistrer)
+        Menubar.interface.bind('<Escape>', self.quitter)
 
-        Menubar.interface.bind('<Escape>', Menubar.quitter)
+    def menubar_set_animation(self, animation):
+        animation.add_command(label = "A*", command = lambda : Menubar.onglet_animation(False))
+        animation.add_command(label = "Dijkstra", command = lambda : Menubar.onglet_animation(False, True))
+        animation.add_command(label = "Course !", command = lambda : Menubar.onglet_animation(True))
 
+        Menubar.interface.bind("<A>", lambda event : self.onglet_animation(False))
+        Menubar.interface.bind("<a>", lambda event : self.onglet_animation(False))
+        Menubar.interface.bind("<d>", lambda event : self.onglet_animation(False, True))
+        Menubar.interface.bind("<D>", lambda event : self.onglet_animation(False, True))
+        Menubar.interface.bind("<c>", lambda event : self.onglet_animation(True))
+        Menubar.interface.bind("<C>", lambda event : self.onglet_animation(True))
+
+    @staticmethod
+    def onglet_animation(course = False, dijkstra = False):
+        Menubar.interface.terrain.animation(course, dijkstra)
+    
     def afficher(self):
         Menubar.interface.root.config(menu = self.menubar)
 
@@ -45,10 +63,6 @@ class Menubar:
     def nouveau(evt = None):
         Menubar.interface.terrain.nouveau_terrain()
 
-    """
-    Attention, ne prend pas en compte les différentes valeurs de couts possibles
-    entre la matrice sauvée et celle en cours.
-    """
     @staticmethod
     def ouvrir(evt = None):
         path = filedialog.askopenfilename(initialdir = "./Saves/",
