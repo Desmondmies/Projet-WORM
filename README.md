@@ -33,9 +33,20 @@ Main_2D.py :
 
 Main_3D.py :
     Celui-ci récupère le fichier de sauvegarde "chemins" dans le dossier Saves et modélise un terrain en 3D à partir du contenu.
+    Le terrain en 3D est en plusieurs fabriqués en plusieurs "couches" :
+        -Quads      => représente les cases de la matrice en plateforme élevé sur l'axe Y
+        -Paliers    => représente les jonctions entre chaque Quads, horizontales et verticales
+        -Centres    => représente les jonctions entre chaque Paliers
+    les couleurs du terrain sont défini selon leur valeur d'élévation
+    Les zones infranchissables sont représentés par des trous grisatre dans le terrain
+    
     On retrouve en vert le ver de terre effectuant le parcours de Dijkstra et en bleu celui de A*.
-    Deux drapeaux sont positionnés afin de marque le point de deépart et d'arriver de chacun des vers.
+    Deux drapeaux représentent respectivement le point de départ et d'arrivée de chacun des vers.
 
     Raccourcis clavier :
-        -Maintenir la barre d'espace : permet d'animer les vers  
+        -Maintenir la barre d'espace : permet d'animer les vers (une fois leur chemin fini il repartiront au point de départ)
+        -Flèche Gauche et Droite : tourner la caméra globale à gauche et à droite
+        -c : changer le mode de vue de la caméra (passage de caméra globale à caméra embarqué et inversement)
+        -a : suivi du ver A* si la caméra est en mode embarqué
+        -d : suivi du ver Dijkstra si la caméra est en mode embarqué
     

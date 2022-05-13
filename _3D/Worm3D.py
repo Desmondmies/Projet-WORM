@@ -34,6 +34,13 @@ class Worm3D:
         gluSphere(self.quadric, size, 30, 20)
 
     def draw_worm(self):
+        """
+        Dessine le ver complet, d'abord sa tête à partir de sa position prédéfini
+        Il récupère les coordonnées moyennes de la cases du terrain sur laquelle il se situe
+        et adapte sa hauteur en fonction
+
+        puis le tracé du corps fera le reste pour ce qui concerne l'aspect ver de terre dans les mouvements du mobile
+        """
         glPushMatrix()
         current_worm_size = self.init_worm_size
 

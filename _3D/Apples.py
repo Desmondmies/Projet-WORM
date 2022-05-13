@@ -4,6 +4,9 @@ from OpenGL.GLU import *
 from _3D.Materials import material_bleu_a_star, material_vert_dijkstra, material_trunc
 
 def draw_trunc(quadric):
+    """
+    Dessine la tige de la pomme
+    """
     glPushMatrix()
     glTranslatef(0, 0.15, 0)
     glRotatef(-90, 1, 0, 0)
@@ -15,6 +18,9 @@ def draw_trunc(quadric):
     glPopMatrix()
 
 def draw_applebody(quadric):
+    """
+    Dessine le corps de la pomme
+    """
     glPushMatrix()
     glTranslatef(-0.1, 0, 0)
     glScalef(0.7, 1, 1)

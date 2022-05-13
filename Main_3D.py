@@ -229,12 +229,6 @@ def reshape(width, height):
 	glMatrixMode(GL_MODELVIEW)
 	glLoadIdentity()
 
-	# Positionne la caméra assez loin et un peu plus haut pour regarder le terrain
-
-	#gluLookAt ( Position Caméra X Y Z, Caméra Target X Y Z, Vecteur vers le haut X Y Z )
-	#gluLookAt(0.0, taille_matrice + 2, taille_matrice * 2,
-	#0.0, 0.0, 0.0,
-	#0.0, 1.0, 0.0)
 	cam_lookAt( (0, taille_matrice+15, (taille_matrice*2)+5), (0, 0, 0), (0, 1, 0) )
 
 # ---------------------------------------------------
@@ -268,17 +262,18 @@ def special_func(key, x, y):
 
 # ---------------------------------------------------
 
-glutInit()
-glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA | GLUT_DEPTH)
+if __name__ == "__main__":
+	glutInit()
+	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA | GLUT_DEPTH)
 
-glutCreateWindow(window_name)
-glutReshapeWindow(width, height)
+	glutCreateWindow(window_name)
+	glutReshapeWindow(width, height)
 
-glutReshapeFunc(reshape)
-glutDisplayFunc(display)
-glutKeyboardFunc(keyboard)
-glutSpecialFunc(special_func)
+	glutReshapeFunc(reshape)
+	glutDisplayFunc(display)
+	glutKeyboardFunc(keyboard)
+	glutSpecialFunc(special_func)
 
-init()
+	init()
 
-glutMainLoop()
+	glutMainLoop()
