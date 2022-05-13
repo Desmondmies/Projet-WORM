@@ -20,10 +20,10 @@ def cam_terrain_view(camPosition, targetPosition, upVector):
 			targetPosition[0], targetPosition[1], targetPosition[2],
 			upVector[0], upVector[1], upVector[2])
 
-def cam_worm_view(targetPosition, upVector):
+def cam_worm_view(upVector):
 	cam_X = 0
-	cam_Y = 10
-	cam_Z = 7
+	cam_Y = 7
+	cam_Z = 3
 
 	target_X = 0
 	target_Y = 0

@@ -4,19 +4,21 @@ from OpenGL.GL import *
 from OpenGL.GLU import *
 from OpenGL.GLUT import *
 
-from Matrice.Matrice import grid_maxValue
 from _3D.TerrainVertex import gen_terrain_data
 from _3D.Camera3D import cam_lookAt, switch_cam, getCameraMode
 from _3D.Worm3D import Worm3D
+from _3D.Materials import material_hauteur, material_drapeau_pointDepart, material_drapeau_pointArrivee, material_poteau
+from _3D.Apples import draw_apple
+
 from Utilitaires.Utils import moyenne_pos_quad, convert_FromPixel_to_Terrain
 
 window_name = "Projet WORM - 3D Edition"
 width, height = 750, 750
 
 taille_matrice = 15
-terrain_offset = taille_matrice + (taille_matrice/6)
+terrain_offset = taille_matrice *1.45
 
-cam_MoveX, cam_MoveZ = 0, 0
+cam_MoveX = 0
 
 quadric = None
 
@@ -36,6 +38,8 @@ bezier_a_star = []
 
 worm_D = None
 worm_A = None
+
+focus_WormD = True
 # ---------------------------------------------------
 
 def open_chemin_file():
@@ -71,45 +75,14 @@ def init():
 
 	worm_A = Worm3D(quadric, terrainData)
 	worm_D = Worm3D(quadric, terrainData, _IsDijkstra=True)
-	#gluQuadricDrawStyle(quadric, GLU_LINE)
 
-def material_obstacle():
-    glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, (0, 0, 0)) #noir
-def material_ocean():
-    glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, (0.3, 0.7, 0.7)) #bleu
-def material_sable():
-    glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, (1, 0.88, 0.5)) #couleur sable?
-def material_herbe():
-    glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, (0.3, 1, 0.3)) #vert
-def material_neige():
-	glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, (0.8, 0.8, 0.8)) #blanc
-def material_poteau():
-	glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, (0.44, 0.45, 0.5)) #gris
-def material_drapeau_pointDepart():
-	glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, (0.38, 0.92, 0.98)) #cyan
-def material_drapeau_pointArrivee():
-	glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, (0.98, 0.18, 0.18)) #rouge
-
-def material_hauteur(h):
-    """
-    Renvoi le materiel nécéssaire selon la hauteur Y du point
-    """
-    hauteur_ratio = h / grid_maxValue
-    if hauteur_ratio < 0:
-        material_obstacle()
-    elif hauteur_ratio <= 0.15:
-        material_ocean()
-    elif hauteur_ratio <= 0.23:
-        material_sable()
-    elif hauteur_ratio <= 0.35:
-        material_herbe()
-    else:
-        material_neige()
+# --------------------------------------------------- 
 
 def draw_quad(quad):
     for vert in quad:
         material_hauteur(vert[1])
         glVertex3f(vert[0], vert[1], vert[2])
+
 def draw_pts(p, _color = True):
 	if _color:
 		material_hauteur(p[1])
@@ -121,6 +94,8 @@ def draw_triangle(tr, _colorOverride = True):
     draw_pts(tr[1], _colorOverride)
     draw_pts(tr[2], _colorOverride)
     draw_pts(tr[3], _colorOverride)
+
+# --------------------------------------------------- 
 
 def display_terrain():
 	#terrainData => [ quads, paliers, centres ]
@@ -153,54 +128,58 @@ def display_terrain():
 
 def display_camera():
 	if getCameraMode() == False:
-		glTranslatef(0.0, 0.0, cam_MoveZ)
+		glTranslatef(0.0, 0.0, 0.0)
 		glRotatef(cam_MoveX, 0.0, 1.0, 0.0)
 	else:
-		# pos = getWormPosition()
-		pos = worm_D.getWormPosition()
-		glTranslatef(-(pos[0] - terrain_offset), 0, -(pos[2] - terrain_offset))
+		if focus_WormD == True:
+			pos = worm_D.getWormPosition()
+		else:
+			pos = worm_A.getWormPosition()
+		glTranslatef(-(pos[0] - terrain_offset), terrain_offset, -(pos[2] - terrain_offset - 30))
 
-
-def display_point_depart():
+def display_flag(isStartFlag = True):
 	glPushMatrix()
-	pos = convert_FromPixel_to_Terrain( bezier_dijkstra[0], len(terrainData["Quads"]) )
+	if isStartFlag == True:
+		pos = convert_FromPixel_to_Terrain( bezier_dijkstra[0], len(terrainData["Quads"]) )
+	else:
+		pos = convert_FromPixel_to_Terrain( bezier_dijkstra[-1], len(terrainData["Quads"]) )
 	pt_depart = moyenne_pos_quad(terrainData["Quads"][int(pos[0])][int(pos[1])])
 	glTranslatef(pt_depart[2], pt_depart[1]+0.5, pt_depart[0])
 	glRotatef(-90, 1, 0, 0)
-
+	
 	material_poteau()
 	gluCylinder(quadric, 0.1, 0.1, 5, 10, 5)
 	glPopMatrix()
 
 	glPushMatrix()
 	glTranslatef(pt_depart[2], pt_depart[1]+3.9, pt_depart[0])
-	material_drapeau_pointDepart()
+
+	if isStartFlag == True:
+		material_drapeau_pointDepart()
+	else:
+		material_drapeau_pointArrivee()
 
 	glBegin(GL_TRIANGLES)
 	draw_triangle(drapeau_vertex, _colorOverride=False) #dessine le drapeau
 	glEnd()
 	glPopMatrix()
 
-def display_point_arrivee():
-	glPushMatrix()
-	pos = convert_FromPixel_to_Terrain( bezier_dijkstra[-1], len(terrainData["Quads"]) )
-	pt_depart = moyenne_pos_quad(terrainData["Quads"][int(pos[0])][int(pos[1])])
-	glTranslatef(pt_depart[2], pt_depart[1]+0.5, pt_depart[0])
-	glRotatef(-90, 1, 0, 0)
+def display_apples():
+	max_idx = len(bezier_dijkstra) if len(bezier_dijkstra) >= len(bezier_a_star) else len(bezier_a_star)
 
-	material_poteau()
-	gluCylinder(quadric, 0.1, 0.1, 5, 10, 5)
-	glPopMatrix()
+	for i in range(14, max_idx, 20):
+		if i < len(bezier_dijkstra):
+			new_d_pos = convert_FromPixel_to_Terrain( bezier_dijkstra[ i ], len(terrainData["Quads"]) )
+			pos_quad = terrainData["Quads"][ int( new_d_pos[1] ) ][ int( new_d_pos[0] ) ]
+			moy_pos = moyenne_pos_quad(pos_quad)
+			draw_apple( quadric, moy_pos )
+		if i < len(bezier_a_star):
+			new_a_pos = convert_FromPixel_to_Terrain( bezier_a_star[ i ], len(terrainData["Quads"]) )
+			pos_quad = terrainData["Quads"][ int( new_a_pos[1] ) ][ int( new_a_pos[0] ) ]
+			moy_pos = moyenne_pos_quad(pos_quad)
+			draw_apple( quadric, moy_pos, isDijkstra=False )
 
-	glPushMatrix()
-	glTranslatef(pt_depart[2], pt_depart[1]+3.9, pt_depart[0])
-	material_drapeau_pointArrivee()
-
-	glBegin(GL_TRIANGLES)
-	draw_triangle(drapeau_vertex, _colorOverride=False) #dessine le drapeau
-	glEnd()
-	glPopMatrix()
-
+# --------------------------------------------------- 
 
 def display():
 	global worm_animation_frame
@@ -215,8 +194,10 @@ def display():
 
 	display_terrain() #dessine le terrain
 
-	display_point_depart()
-	display_point_arrivee()
+	display_flag()
+	display_flag(isStartFlag=False)
+
+	display_apples()
 
 	if worm_animation_frame < len(bezier_dijkstra):
 		new_d_pos = convert_FromPixel_to_Terrain( bezier_dijkstra[ int(worm_animation_frame) ], len(terrainData["Quads"]) )
@@ -236,6 +217,8 @@ def display():
 	glPopMatrix()
 	glutSwapBuffers()
 
+# ---------------------------------------------------
+
 def reshape(width, height):
 	ar = float(width / height)
 	glViewport(0, 0, width, height)
@@ -252,42 +235,36 @@ def reshape(width, height):
 	#gluLookAt(0.0, taille_matrice + 2, taille_matrice * 2,
 	#0.0, 0.0, 0.0,
 	#0.0, 1.0, 0.0)
-	cam_lookAt( (0, taille_matrice+2, taille_matrice*2), (0, 0, 0), (0, 1, 0) )
+	cam_lookAt( (0, taille_matrice+15, (taille_matrice*2)+5), (0, 0, 0), (0, 1, 0) )
+
+# ---------------------------------------------------
 
 def keyboard(key, x, y):
-	global cam_MoveX, cam_MoveZ, worm_animation_frame
+	global cam_MoveX, worm_animation_frame, focus_WormD
 
-	if key == b'z':
-		cam_MoveZ = (cam_MoveZ + 0.5) % 360
-	elif key == b's':
-		cam_MoveZ = (cam_MoveZ - 0.5) % 360
-	if key == b'q':
-		cam_MoveX = (cam_MoveX + 2) % 360
-	elif key == b'd':
-		cam_MoveX = (cam_MoveX - 2) % 360
-	elif key == b' ':
-		worm_animation_frame += 0.5
+	if key == b' ':
+		worm_animation_frame += 1.5
 
 	if key == b'c':
 		switch_cam(width, height)
+	elif key == b'a':
+		focus_WormD = False
+	elif key == b'd':
+		focus_WormD = True
 
 	glutPostRedisplay()
 
-# def special_func(key, x, y):
-#     """
-#     Special Func prend en compte "autres" touches du clavier? dont les flèches
-#     """
-#     # if key == GLUT_KEY_UP:
-#     #     worm_moveZ(-1)
-#     # elif key == GLUT_KEY_DOWN:
-#     #     worm_moveZ(1)
-#     # elif key == GLUT_KEY_LEFT:
-#     #     worm_moveX(-1)
-#     # elif key == GLUT_KEY_RIGHT:
-#     #     worm_moveX(1)
+def special_func(key, x, y):
+	global cam_MoveX
+	"""
+	Special Func prend en compte "autres" touches du clavier? dont les flèches
+	"""
+	if key == GLUT_KEY_LEFT:
+		cam_MoveX = (cam_MoveX + 2) % 360
+	elif key == GLUT_KEY_RIGHT:
+		cam_MoveX = (cam_MoveX - 2) % 360
 
-#     glutPostRedisplay()
-
+	glutPostRedisplay()
 
 # ---------------------------------------------------
 
@@ -300,7 +277,7 @@ glutReshapeWindow(width, height)
 glutReshapeFunc(reshape)
 glutDisplayFunc(display)
 glutKeyboardFunc(keyboard)
-# glutSpecialFunc(special_func)
+glutSpecialFunc(special_func)
 
 init()
 

@@ -3,6 +3,7 @@ from OpenGL.GLU import *
 from OpenGL.GLUT import *
 
 from Utilitaires.Utils import normalize_vec, substract_list, moyenne_pos_quad
+from _3D.Materials import material_rose, material_bleu_a_star, material_vert_dijkstra
 
 class Worm3D:
     def __init__(self, _quadric, terrainData, _worm_len = 7, _IsDijkstra = False) -> None:
@@ -21,15 +22,12 @@ class Worm3D:
 
         self.initPos = [0, 0]
         self.initTerrainPos = [2, 2]
-    
-    def pinkMaterial(self):
-        glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, (0.9, 0.5, 0.9)) #rose
 
     def dijkstra_or_aStar_Material(self):
         if self.isDijkstra:
-            glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, (0, 0.588, 0.098)) #vert
+            material_vert_dijkstra()
         else:
-            glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, (0, 0.062, 0.639)) #bleu
+            material_bleu_a_star()
 
     def draw_part(self, pos, size):
         glTranslatef(pos[0], pos[1], pos[2])
@@ -62,7 +60,7 @@ class Worm3D:
 
         self.worm[0] = moy_pos #remplace la position de la tête
 
-        self.pinkMaterial()
+        material_rose()
         self.draw_part( self.worm[0], current_worm_size) #dessine la tête
         self.dijkstra_or_aStar_Material()
 
